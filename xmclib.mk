@@ -10,7 +10,7 @@ XMCLIB_INC := \
 	-I$(XMCLIB_CMSIS)/Include \
 	-I$(XMCLIB_CMSIS)/Infineon/Include \
 	-I$(XMCLIB_CMSIS)/Infineon/$(UC)_series/Include
-CMSIS_SRC := $(CMSIS)/Infineon/$(UC)_series/Source/
-XMCLIB_LINKERSCRIPT := $(CMSIS_SRC)/GCC/$(UC)x$(UC_MEM).ld
+XMCLIB_CMSIS_SRC := $(XMCLIB_CMSIS)/Infineon/$(UC)_series/Source/
+XMCLIB_LINKERSCRIPT := $(XMCLIB_CMSIS_SRC)/GCC/$(UC)x$(UC_MEM).ld
 XMCLIB_VERSION := 2.1.8
 $(info Using xmclib version $(XMCLIB_VERSION) $(XMCLIB_DIR))

@@ -2427,7 +2427,7 @@ http_accept(void *arg, struct tcp_pcb *pcb, err_t err)
  * Initialize the httpd with the specified local address.
  */
 static void
-httpd_init_addr(ip_addr_t *local_addr)
+httpd_init_addr(ip_addr_t const* local_addr)
 {
   struct tcp_pcb *pcb;
   err_t err;

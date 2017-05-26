@@ -131,3 +131,9 @@ XMC Peripheral Library v2.1.8     (30-08-2016)
   - See changelog section in the documentation files for individual peripheral driver changes
   - Added USBH driver
   - Added USBH and USBD driver examples
+
+XMC Peripheral Library v2.1.12     (21-04-2017)
+--------------------------------------------
+  - Updated CMSIS component to v5.0.0. See release notes in CMSIS/Readme.txt
+  - See changelog section in the documentation files for individual peripheral driver changes
+  - Several examples added

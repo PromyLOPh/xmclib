@@ -2,6 +2,59 @@
  * @page Changelog
  *
  * @tableofcontents
+ * @section v2112 Version 2.1.12
+ * @subsection SCU SCU
+ * - Fixed:
+ *     - XMC_SCU_CLOCK_EnableDCO1ExtRefCalibration() prescaler equation 
+ * - Added:
+ *     - XMC_SCU_SetBMI()
+ *
+ * @subsection MATH MATH
+ *  - Changed:
+ *     - Foward declaration of __aeabi_* to fix link time optimization (-flto) compilation errors
+ *
+ * @section v2110 Version 2.1.10
+ * @subsection COMMON COMMON
+ * - Fixed:
+ *     - Changed type of size in XMC_PRIOARRAY_t to fix compilation warnings
+ *     - Fixed compilation warning in XMC_AssertHandler
+ * - Changed:
+ *     - Remove the need to define XMC_USER_ASSERT_FUNCTION
+ *
+ * @subsection ADC ADC
+ * - Fixed:
+ *     - Fix assertion in XMC_VADC_GROUP_CheckSlaveReadiness() and XMC_VADC_GROUP_IgnoreSlaveReadiness() checking the slave_group parameter 
+ *
+ * - Added:
+ *      - New macros equivalent to th existing ones but with better naming.
+ *        @note Old macros are kept for backward compatibility but they deprecated.
+ *      - new functions to remove channels from background request source, XMC_VADC_GLOBAL_BackgroundRemoveChannelFromSequence() and XMC_VADC_GLOBAL_BackgndRemoveMultipleChannels()
+ *
+ * @subsection CCU4 CCU4
+ * - Fixed:
+ *     - XMC_CCU4_lAssertReset(), XMC_CCU4_lDeassertReset(), XMC_CCU4_lGateClock() and XMC_CCU4_lUngateClock() fix compilation warnings.
+ *
+ * @subsection CCU8 CCU8
+ * - Fixed:
+ *     - XMC_CCU8_lAssertReset(), XMC_CCU8_lDeassertReset(), XMC_CCU8_lGateClock() and XMC_CCU8_lUngateClock() fix compilation warnings.
+ *
+ * @subsection LEDTS LEDTS
+ * - Fixed:
+ *     - XMC_LEDTS_InitGlobal() fixed compilation warnings
+ *
+ * @subsection POSIF POSIF
+ * - Fixed:
+ *     - XMC_POSIF_Enable() and XMC_POSIF_Disable() fixed compilation warnings
+ *
+ * @subsection SCU SCU
+ * - Fixed:
+ *     - At XMC_SCU_CLOCK_Init() issue while reading oscillator watchdog status
+ *
+ * @subsection USIC USIC
+ * - Added:
+ *    - XMC_USIC_CH_SetShiftDirection() to allow selection of shift direction of the data words for transmision and reception
+ *    - XMC_USIC_CH_GetCaptureTimerValue() and XMC_USIC_CH_SetFractionalDivider()
+ *
  * @section v218 Version 2.1.8
  * @subsection GENERAL GENERAL
  * - Added:

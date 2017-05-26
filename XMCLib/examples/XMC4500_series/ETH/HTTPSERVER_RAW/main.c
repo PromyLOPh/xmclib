@@ -16,8 +16,8 @@
 
 /**
  * @file
- * @date 20 April,2016
- * @version 1.0.2
+ * @date 13 April,2017
+ * @version 1.1.0
  *
  * @brief ETH HTTP server demo example using the netconn interface
  *
@@ -28,13 +28,17 @@
  *
  * Version 1.0.2
  * - Stability and speed improvements
+ *
+ * Version 1.1.0
+ * - lwIP 2.0.2
+ *
  */
 
 #include <xmc_gpio.h>
 
-#include <lwip/timers.h>
 #include <lwip/netif.h>
 #include <lwip/init.h>
+#include <lwip/timeouts.h>
 #include <netif/etharp.h>
 #include <ethernetif.h>
 #include "httpserver_raw/httpd.h"
@@ -92,9 +96,9 @@ static void buttons_timer(void *arg)
 
 static void LWIP_Init(void)
 {
-  struct ip_addr ipaddr;
-  struct ip_addr netmask;
-  struct ip_addr gw;
+  ip_addr_t ipaddr;
+  ip_addr_t netmask;
+  ip_addr_t gw;
 
 #if LWIP_DHCP == 0
   IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);

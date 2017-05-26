@@ -37,6 +37,8 @@
 /*********************************************************************************************************************
  * HEADER FILES
  ********************************************************************************************************************/
+#include <stdio.h>
+
 #include <xmc_vadc.h>
 #include <xmc_scu.h>
 #include <xmc_gpio.h>
@@ -46,7 +48,7 @@
  * MACROS
  ********************************************************************************************************************/
 /* Pin P14.1 is measured and converted */
-#define CHANNEL_NUMBER    (1U)
+#define CHANNEL_NUMBER    (7U)
 #define VADC_GROUP_PTR    (VADC_G0)  
 
 /* Register result */
@@ -130,10 +132,8 @@ void VADC0_G0_0_IRQHandler(void)
 
   /* Acknowledge the interrupt */
   XMC_VADC_GROUP_QueueClearReqSrcEvent(VADC_GROUP_PTR);
-
-  /* Transmit measurement result */
-  XMC_UART_CH_Transmit(XMC_UART0_CH0, (result & 0xf00U) >> 8U);
-  XMC_UART_CH_Transmit(XMC_UART0_CH0, result & 0x0ffU);
+ 
+  printf("ADC: %d\r\n", result);
 }
 
 /* Trigger periodically a conversion request */
@@ -159,7 +159,7 @@ int main(void)
   /* Configure a conversion kernel */
   XMC_VADC_GROUP_Init(VADC_GROUP_PTR, &g_group_config);
 
-	XMC_VADC_GROUP_QueueInit(VADC_GROUP_PTR, &g_queue_config);
+  XMC_VADC_GROUP_QueueInit(VADC_GROUP_PTR, &g_queue_config);
 	
   /* Configure a channel belonging to the aforesaid conversion kernel */
   XMC_VADC_GROUP_ChannelInit(VADC_GROUP_PTR,CHANNEL_NUMBER, &g_channel_config);

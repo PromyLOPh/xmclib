@@ -1,12 +1,12 @@
 /**
  * @file xmc_vadc.h
- * @date 2016-06-17
+ * @date 2017-02-06
  *
  * @cond
-*********************************************************************************************************************
- * XMClib v2.1.8 - XMC Peripheral Driver Library 
+ *********************************************************************************************************************
+ * XMClib v2.1.12 - XMC Peripheral Driver Library 
  *
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
  *                                             
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the 
@@ -102,6 +102,10 @@
  *           - XMC_VADC_GROUP_SetSyncReadySignal
  *           - XMC_VADC_GROUP_GetSyncReadySignal
  *           - XMC_VADC_GROUP_GetResultRegPriority
+ *
+ * 2017-02-06:
+ *     - Added new functions to remove channels from background request source, XMC_VADC_GLOBAL_BackgroundRemoveChannelFromSequence() and XMC_VADC_GLOBAL_BackgndRemoveMultipleChannels()
+ *
  * @endcond 
  *
  */
@@ -3445,6 +3449,65 @@ __STATIC_INLINE void XMC_VADC_GLOBAL_BackgndAddMultipleChannels(XMC_VADC_GLOBAL_
   XMC_ASSERT("XMC_VADC_GLOBAL_BackgndAddMultipleChannels:Wrong Module Pointer", (global_ptr == VADC))
   XMC_ASSERT("XMC_VADC_GLOBAL_BackgndAddMultipleChannels:Wrong Group Number",   ((grp_num) < XMC_VADC_MAXIMUM_NUM_GROUPS))
   global_ptr->BRSSEL[grp_num] |= ch_mask;
+}
+
+/**
+ * @param global_ptr       Pointer to the VADC module
+ * @param grp_num    ID of the VADC group whose unprioritized channels have been assigned to background scan
+ *                   Request source
+ * @param ch_num     The unprioritized channel meant to be added to the scan sequence
+ *                   <BR>Range: [0x0 to 0x7]
+ * @return
+ *    None
+ *
+ * \par<b>Description:</b><br>
+ * Removes a channel to the background scan sequence.<BR>\n
+ * Call this API to insert a new single channel into the background scan request source. This will be added to the scan
+ * sequence. The added channel will be part of the conversion sequence when the next load event occurs.
+ * A call to this API would configure the register bit fields of BRSSEL.
+ *
+ * \par<b>Related APIs:</b><br>
+ *  XMC_VADC_GLOBAL_BackgroundAddChannelToSequence()<BR>
+ */
+__STATIC_INLINE void XMC_VADC_GLOBAL_BackgroundRemoveChannelFromSequence(XMC_VADC_GLOBAL_t *const global_ptr,
+                                                                         const uint32_t grp_num,
+                                                                         const uint32_t ch_num)
+{
+  XMC_ASSERT("XMC_VADC_GLOBAL_BackgroundAddChannelToSequence:Wrong Module Pointer", (global_ptr == VADC))
+  XMC_ASSERT("XMC_VADC_GLOBAL_BackgroundAddChannelToSequence:Wrong Group Number",((grp_num) < XMC_VADC_MAXIMUM_NUM_GROUPS))
+  XMC_ASSERT("XMC_VADC_GLOBAL_BackgroundAddChannelToSequence:Wrong Channel Number",
+             ((ch_num) < XMC_VADC_NUM_CHANNELS_PER_GROUP))
+
+  global_ptr->BRSSEL[grp_num] &= (uint32_t)~((uint32_t)1 << ch_num);
+}
+
+/**
+ * @param global_ptr       Pointer to the VADC module
+ * @param grp_num    ID of the VADC group whose unprioritized channels have been assigned to background scan
+ * @param ch_mask    Mask word indicating channels which form part of scan conversion sequence
+ *                   Bit location 0/1/2/3/4/5/6/7 represents channels-0/1/2/3/4/5/6/7 respectively.
+ *                   To Add the channel to the scan sequence enable the respective bit.
+ *                   Passing a 0x0 will clear all the previously selected channels
+ *                   <BR>Range: [0x0 to 0xFF]
+ * @return
+ *    None
+ *
+ * \par<b>Description:</b><br>
+ * Removes multiple channels to the scan sequence.<BR>\n
+ * Call this API to insert a multiple channels into the scan request source. This will be added to a scan
+ * sequence. The added channels will be a part of the conversion sequence when the next load event occurs.
+ * A call to this API would configure the register bit fields of BRSSEL.
+ *
+ * \par<b>Related APIs:</b><br>
+ *  XMC_VADC_GLOBAL_BackgroundAddChannelToSequence()<BR>
+ */
+__STATIC_INLINE void XMC_VADC_GLOBAL_BackgndRemoveMultipleChannels(XMC_VADC_GLOBAL_t *const global_ptr,
+                                                                   const uint32_t grp_num,
+                                                                   const uint32_t ch_mask)
+{
+  XMC_ASSERT("XMC_VADC_GLOBAL_BackgndAddMultipleChannels:Wrong Module Pointer", (global_ptr == VADC))
+  XMC_ASSERT("XMC_VADC_GLOBAL_BackgndAddMultipleChannels:Wrong Group Number",   ((grp_num) < XMC_VADC_MAXIMUM_NUM_GROUPS))
+  global_ptr->BRSSEL[grp_num] &= (uint32_t)~ch_mask;
 }
 
 /**

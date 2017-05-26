@@ -10,7 +10,7 @@ of server using lWIP.
   - the raw API
   - the system timer to  to have certain functions called at regular intervals to 
     perform house-keeping tasks, such as handling TCP timeouts, retransmissions and so forth.
-  - Uses CGI
+  - Uses CGI and SSI
 
 * fsdata.c is the flash file system, generated from the makefsdata folder using the makefsdata utility
   - to generate new content for the server, 
@@ -27,9 +27,13 @@ How to test the application
 a. Copy the files to a new project
    The following directories need to be added to the compiler include paths:
    "${workspace_loc:/${ProjName}/lwip/include}"
-   "${workspace_loc:/${ProjName}/lwip/include/ipv4}"
    "${workspace_loc:/${ProjName}/lwip/port/nosys/include}"
    "${workspace_loc:/${ProjName}/lwip/port/nosys/netif}"
+   "${workspace_loc:/${ProjName}/httpserver_raw}"
+
+   The following macors need to be defined in the compiler settings:
+     XMC_ETH_PHY_KSZ8081RNB
+
 b. Compile and flash the application onto the device
 c. Run the application. 
 
@@ -37,3 +41,6 @@ The IP address of the board is manual configured using 192.168.0.10.
 Reconfigure PC network address to something like 192.168.0.11. 
 Direct your web browser at 192.168.0.10, a welcome message should be displayed.
 Pressing the button toggles the LED1 of the Relaxkit.
+
+NOTE: New batch of Relaxkit boards are using ksz8081 instead of ksz8031. 
+      If the application hangs in the ethernetif_error function, please use the ksz8031 by replacing the C macro XMC_ETH_PHY_KSZ8081RNB by XMC_ETH_PHY_KSZ8031RNL in compiler settings.

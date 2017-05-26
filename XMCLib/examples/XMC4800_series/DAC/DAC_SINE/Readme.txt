@@ -4,10 +4,9 @@ This example project depicts usage of DAC drivers.
 
 Hardware Setup
 ===============
-XMC4500 Hexagon board / XMC4500 Relax Kit
-This example demonstrate two of five DAC configurations. It generates an analog sine 
-wave on DAC0 Output and a static analog value on DAC1 Output.
-XMC48  P14.8 (DAC0),  P14.9 (DAC1)
+XMC4800/XMC4700 Relax Kit
+This example demonstrate two of five DAC configurations. 
+It generates an analog sine wave on DAC0 Output (P14.8) and a static analog value on DAC1 Output (P14.9).
 
 How to test the application
 ============================

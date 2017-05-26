@@ -62,8 +62,12 @@ typedef enum PCA9502_REGADDR {
  * GLOBAL DATA
  ********************************************************************************************************************/
 
-/* SCU configuration */
-XMC_SCU_CLOCK_CONFIG_t clock_config =
+/* Clock configuration */
+/* fPLL = 120MHz */
+/* fSYS = 120MHz */
+/* fUSBPLL = 192MHz */
+/* fUSB = 48MHz */
+const XMC_SCU_CLOCK_CONFIG_t clock_config =
 {
  .syspll_config.p_div = 2,
  .syspll_config.n_div = 80,

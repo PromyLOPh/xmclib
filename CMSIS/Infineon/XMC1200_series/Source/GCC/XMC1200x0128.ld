@@ -1,14 +1,14 @@
 /**
  * @file XMC1200x0128.ld
- * @date 2016-03-15
+ * @date 2017-04-20
  *
  * @cond
  *********************************************************************************************************************
- * Linker file for the GNU C Compiler v1.9
+ * Linker file for the GNU C Compiler v1.11
  * Supported devices: XMC1201-T038F0128
  *                    XMC1201-Q040F0128
  *
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
  *                                             
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the 
@@ -48,6 +48,15 @@
  * 2016-03-15:
  *     - Add assertion to check that region SRAM_combined does not overflowed no_init section 
  *                                                      
+ * 2016-10-28:
+ *     - Fix linker not complaining if sum of data + text sections is bigger that physical FLASH size
+ *      
+ * 2017-04-07:
+ *     - Added new symbols __text_size and eText
+ *                            
+ * 2017-04-20:
+ *     - Change vtable location to flash area to save ram             
+ *
  * @endcond 
  *
  */
@@ -95,6 +104,10 @@ SECTIONS
 
       *(.rodata .rodata.*)
       *(.gnu.linkonce.r*)
+
+      *(vtable)        
+
+      . = ALIGN(4);
     } > FLASH
 
     .eh_frame_hdr : ALIGN (4)
@@ -122,21 +135,18 @@ SECTIONS
     __exidx_end = .;
     . = ALIGN(4);
 
-    /* End of RO-DATA and start of LOAD region for the veneers */
-    eROData = . ;
-
     /* DSRAM layout (Lowest to highest)*/
     /* Veneer <-> Stack <-> DATA <-> BSS <-> HEAP */
 
-    .VENEER_Code ABSOLUTE(0x2000000C): AT(eROData)
+    .VENEER_Code ABSOLUTE(0x2000000C):
     {
         . = ALIGN(4); /* section size must be multiply of 4. See startup.S file */
         VeneerStart = .;
         KEEP(*(.XmcVeneerCode));
         . = ALIGN(4); /* section size must be multiply of 4. See startup.S file */
         VeneerEnd = .;
-    } > SRAM
-
+    } > SRAM AT > FLASH
+    eROData = LOADADDR (.VENEER_Code);
     VeneerSize = ABSOLUTE(VeneerEnd) - ABSOLUTE(VeneerStart);
 
     /* Dummy section for stack */
@@ -148,12 +158,10 @@ SECTIONS
     } > SRAM
 
      /* Standard DATA and user defined DATA/BSS/CONST sections */
-    DataLoadAddr = eROData + VeneerSize;
-    .data : AT(DataLoadAddr)
+    .data :
     {
       . = ALIGN(4); /* section size must be multiply of 4. See startup.S file */
       __data_start = .;
-      *(vtable)        
       * (.data);
       * (.data*);
       *(*.data);
@@ -182,10 +190,11 @@ SECTIONS
 
       . = ALIGN(4); /* section size must be multiply of 4. See startup.S file */
       __data_end = .;
-    } > SRAM
+    } > SRAM AT > FLASH
+    DataLoadAddr = LOADADDR (.data);
     __data_size = __data_end - __data_start;
 
-    .ram_code : AT(DataLoadAddr + __data_size)
+    .ram_code :
     {
         . = ALIGN(4); /* section size must be multiply of 4. See startup.S file */
         __ram_code_start = .;
@@ -193,10 +202,13 @@ SECTIONS
         *(.ram_code)   
         . = ALIGN(4); /* section size must be multiply of 4. See startup.S file */
         __ram_code_end = .;
-    } > SRAM
+    } > SRAM AT > FLASH
     __ram_code_load = LOADADDR (.ram_code);
     __ram_code_size = __ram_code_end - __ram_code_start;
     
+    __text_size = (__exidx_end - sText) + VeneerSize + __data_size + __ram_code_size;
+    eText = sText + __text_size;
+
     /* BSS section */
     .bss (NOLOAD) :
     {

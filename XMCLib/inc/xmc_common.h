@@ -1,12 +1,12 @@
 /**
  * @file xmc_common.h
- * @date 2016-05-30
+ * @date 2017-04-04
  *
  * @cond
   *********************************************************************************************************************
- * XMClib v2.1.8 - XMC Peripheral Driver Library 
+ * XMClib v2.1.12 - XMC Peripheral Driver Library 
  *
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
  *                                             
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the 
@@ -47,6 +47,13 @@
  * 2016-05-30:
  *     - Updated XMC_LIB_VERSION macro to v2.1.8
  *
+ * 2016-11-18:
+ *     - Updated XMC_LIB_VERSION macro to v2.1.10
+ *     - Changed type of size in XMC_PRIOARRAY_t to fix compilation warnings
+ *
+ * 2017-04-04:
+ *     - Updated XMC_LIB_VERSION macro to v2.1.12
+ *
  * @endcond 
  *
  */
@@ -77,7 +84,7 @@
  *********************************************************************************************************************/
 #define XMC_LIB_MAJOR_VERSION	(2U)
 #define XMC_LIB_MINOR_VERSION	(1U)
-#define XMC_LIB_PATCH_VERSION	(8U)
+#define XMC_LIB_PATCH_VERSION	(12U)
  
 #define XMC_LIB_VERSION         ((XMC_LIB_MAJOR_VERSION << 16U) + (XMC_LIB_MINOR_VERSION << 8U) + XMC_LIB_PATCH_VERSION)
 
@@ -151,7 +158,7 @@ typedef struct XMC_PRIOARRAY_ITEM
  */
 typedef struct XMC_PRIOARRAY
 {
-  uint32_t size;
+  int32_t size;
   XMC_PRIOARRAY_ITEM_t *items;
 } XMC_PRIOARRAY_t;
 

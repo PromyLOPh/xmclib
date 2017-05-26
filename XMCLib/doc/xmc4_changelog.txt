@@ -2,6 +2,80 @@
  * @page Changelog
  *
  * @tableofcontents
+ * @section v2112 Version 2.1.12
+ * @subsection ETH_MAC ETH_MAC
+ * - Fixed:
+ *     - XMC_ETH_MAC_InitPTP() fixed initialization
+ *     - XMC_ETH_MAC_UpdatePTPTime(), XMC_ETH_MAC_SetPTPAlarm() fixed nanoseconds initialization
+ *     - Ordering of PTP nanoseconds and seconds members in XMC_ETH_MAC_DMA_DESC_t structure
+ * - Changed:
+ *     - XMC_ETH_MAC_Init() to disable PMT and timestamp interrupt events and MMC IPC receive interrupt event
+ *     - XMC_ETH_MAC_GetTxTimeStamp() and XMC_ETH_MAC_GetRxTimeStamp() return the timestamp depending on status bit in descriptor 
+ * - Added:
+ *     - XMC_ETH_MAC_InitPTPEx(), extension to XMC_ETH_MAC_InitPTP() adding a new parameter to set the time
+ *     - XMC_ETH_MAC_SetPTPTime() to set the system time
+ *     - XMC_ETH_MAC_UpdateAddend() to directly write to the addend register
+ *     - XMC_ETH_MAC_EnablePTPAlarm() and XMC_ETH_MAC_DisablePTPAlarm
+ * 
+ * @section v2110 Version 2.1.10
+ * @subsection COMMON COMMON
+ * - Fixed:
+ *     - Changed type of size in XMC_PRIOARRAY_t to fix compilation warnings
+ *     - Fixed compilation warning in XMC_AssertHandler
+ * - Changed:
+ *     - Remove the need to define XMC_USER_ASSERT_FUNCTION
+ *
+ * @subsection ADC ADC
+ * - Fixed:
+ *    - Add missing support for XMC4700
+ *    - Renamed XMC_CCU_41_ST2 to  XMC_CCU_41_ST3
+ *    - Fix assertion in XMC_VADC_GROUP_CheckSlaveReadiness() and XMC_VADC_GROUP_IgnoreSlaveReadiness() checking the slave_group parameter 
+ * - Added:
+ *    - New macros equivalent to th existing ones but with better naming.
+ *       @note Old macros are kept for backward compatibility but they deprecated.
+ *    - ECAT support for XMC48/43
+ *    - new functions to remove channels from background request source, XMC_VADC_GLOBAL_BackgroundRemoveChannelFromSequence() and XMC_VADC_GLOBAL_BackgndRemoveMultipleChannels()
+ *
+ * @subsection CCU4 CCU4
+ * - Fixed:
+ *     - XMC_CCU4_lAssertReset(), XMC_CCU4_lDeassertReset(), XMC_CCU4_lGateClock() and XMC_CCU4_lUngateClock() fix compilation warnings.
+ *
+ * @subsection CCU8 CCU8
+ * - Fixed:
+ *     - XMC_CCU8_lAssertReset(), XMC_CCU8_lDeassertReset(), XMC_CCU8_lGateClock() and XMC_CCU8_lUngateClock() fix compilation warnings.
+ *
+ * @subsection DMA DMA
+ * - Fixed:
+ *    - Fix documentation on maximum block size
+ * 
+ * @subsection ETH_MAC ETH_MAC
+ * - Fixed:
+ *    - XMC_ETH_MAC_SetPortControl() fixed compilation warning
+ *    - XMC_ETH_MAC_Enable() and XMC_ETH_MAC_Disable(), fixed compilation warnings
+ * - Changed:
+ *    - XMC_ETH_MAC_Init() to optimize access to bus
+ *
+ * @subsection ERU ERU
+ * - Fixed:
+ *    - Remove incorrect ERU0_ETL1_INPUTB_P0_1 and replace it by ERU0_ETL1_INPUTB_SCU_HIB_SR1
+ *
+ * @subsection LEDTS LEDTS
+ * - Fixed:
+ *     - XMC_LEDTS_InitGlobal() fixed compilation warnings
+ *
+ * @subsection POSIF POSIF
+ * - Fixed:
+ *     - XMC_POSIF_Enable() and XMC_POSIF_Disable() fixed compilation warnings
+ *
+ * @subsection SDMMC SDMMC
+ * - Added:
+ *    - XMC_SDMMC_SetCardDetectionSource() and XMC_SDMMC_SetCardDetectionStatus() which are needed in case the pin SDCD (default) is not used as card detection
+ *
+ * @subsection USIC USIC
+ * - Added:
+ *    - XMC_USIC_CH_SetShiftDirection() to allow selection of shift direction of the data words for transmision and reception
+ *    - XMC_USIC_CH_GetCaptureTimerValue() and XMC_USIC_CH_SetFractionalDivider()
+ *
  * @section v218 Version 2.1.8
  * @subsection GENERAL GENERAL
  * - Added:

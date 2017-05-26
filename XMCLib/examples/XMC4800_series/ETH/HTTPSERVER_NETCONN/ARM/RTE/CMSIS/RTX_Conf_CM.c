@@ -76,7 +76,7 @@
 //   <i> Defines the combined stack size for threads with user-provided stack size.
 //   <i> Default: 0
 #ifndef OS_PRIVSTKSIZE
- #define OS_PRIVSTKSIZE 4096       // this stack size value is in words
+ #define OS_PRIVSTKSIZE 1024       // this stack size value is in words
 #endif
  
 //   <q>Stack overflow checking
@@ -117,7 +117,7 @@
 //   <i> When the Cortex-M SysTick timer is used, the input clock 
 //   <i> is on most systems identical with the core clock.
 #ifndef OS_CLOCK
- #define OS_CLOCK       120000000
+ #define OS_CLOCK       144000000
 #endif
  
 //   <o>RTX Timer tick interval value [us] <1-1000000>

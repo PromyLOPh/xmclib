@@ -16,8 +16,8 @@
 
 /**
  * @file
- * @date 20 April,2016
- * @version 1.0.2
+ * @date 13 April,2017
+ * @version 1.1.0
  *
  * @brief ETH HTTP server demo example using the netconn interface
  *
@@ -28,6 +28,10 @@
  *
  * Version 1.0.2
  * - Stability and speed improvements
+ *
+ * Version 1.1.0
+ * - lwIP 2.0.2
+ *
  */
 
 #include "xmc_gpio.h"
@@ -36,6 +40,10 @@
 #include "lwip/netif.h"
 #include "ethernetif.h"
 #include "httpserver_netconn/httpserver-netconn.h"
+
+#if LWIP_DHCP == 1
+#include <lwip/dhcp.h>
+#endif
 
 #define LED1 P1_1
 
@@ -57,20 +65,26 @@
 #define GW_ADDR2   0
 #define GW_ADDR3   1
 
-struct netif xnetif;
+extern struct netif xnetif;
 
 void LWIP_Init(void)
 {
-  struct ip_addr ipaddr;
-  struct ip_addr netmask;
-  struct ip_addr gw;
+  ip_addr_t ipaddr;
+  ip_addr_t netmask;
+  ip_addr_t gw;
 
-  /* Create tcp_ip stack thread */
-  tcpip_init( NULL, NULL );
-
+#if LWIP_DHCP == 0
   IP4_ADDR(&ipaddr, IP_ADDR0, IP_ADDR1, IP_ADDR2, IP_ADDR3);
   IP4_ADDR(&netmask, NETMASK_ADDR0, NETMASK_ADDR1 , NETMASK_ADDR2, NETMASK_ADDR3);
   IP4_ADDR(&gw, GW_ADDR0, GW_ADDR1, GW_ADDR2, GW_ADDR3);
+#else
+  ipaddr.addr = 0;
+  netmask.addr = 0;
+  gw.addr = 0;
+#endif
+
+  /* Create tcp_ip stack thread */
+  tcpip_init( NULL, NULL );
 
   /* - netif_add(struct netif *netif, struct ip_addr *ipaddr,
   struct ip_addr *netmask, struct ip_addr *gw,
@@ -89,11 +103,18 @@ void LWIP_Init(void)
   /*  Registers the default network interface.*/
   netif_set_default(&xnetif);
 
-  /* Set Ethernet link flag */
-  xnetif.flags |= NETIF_FLAG_LINK_UP;
+#if LWIP_NETIF_STATUS_CALLBACK == 1
+  /* Initialize interface status change callback */
+  netif_set_status_callback(&xnetif, ETH_NETIF_STATUS_CB_FUNCTION);
+#endif
 
-  /* When the netif is fully configured this function must be called.*/
-  netif_set_up(&xnetif);
+  /* device capabilities */
+  xnetif.flags |= NETIF_FLAG_ETHARP;
+
+#if LWIP_DHCP == 1
+  /* Enable DHCP flag if DHCP is configured*/
+  xnetif.flags |= NETIF_FLAG_DHCP;
+#endif
 
 }
 

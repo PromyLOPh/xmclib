@@ -3,14 +3,13 @@ Description of example project
 
 HTTPSERVER
 
-This is a demonstration of how to make the most basic kind 
-of server using lWIP.
+This is a demonstration of how to make the most basic kind of server using lWIP.
 
 * httpd.c - uses,
   - the raw API
   - the system timer to  to have certain functions called at regular intervals to 
     perform house-keeping tasks, such as handling TCP timeouts, retransmissions and so forth.
-  - Uses CGI
+  - Uses CGI and SSI
 
 * fsdata.c is the flash file system, generated from the makefsdata folder using the makefsdata utility
   - to generate new content for the server, 
@@ -20,16 +19,20 @@ of server using lWIP.
 
 Hardware Setup
 ===============
-XMC4500 Relaxkit 
+XMC4700/XMC4800 Relaxkit 
 
 How to test the application
 ============================
 a. Copy the files to a new project
    The following directories need to be added to the compiler include paths:
    "${workspace_loc:/${ProjName}/lwip/include}"
-   "${workspace_loc:/${ProjName}/lwip/include/ipv4}"
    "${workspace_loc:/${ProjName}/lwip/port/nosys/include}"
    "${workspace_loc:/${ProjName}/lwip/port/nosys/netif}"
+   "${workspace_loc:/${ProjName}/httpserver_raw}"
+
+   The following macors need to be defined in the compiler settings:
+     XMC_ETH_PHY_KSZ8081RNB
+     
 b. Compile and flash the application onto the device
 c. Run the application. 
 

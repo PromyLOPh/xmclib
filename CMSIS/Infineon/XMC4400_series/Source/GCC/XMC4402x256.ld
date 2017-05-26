@@ -1,14 +1,14 @@
 /**
  * @file XMC4402x256.ld
- * @date 2016-03-08
+ * @date 2017-04-20
  *
  * @cond
  *********************************************************************************************************************
- * Linker file for the GNU C Compiler v1.7
+ * Linker file for the GNU C Compiler v1.8
  * Supported devices: XMC4402-F100x256
  *                    XMC4402-F64x256
  *
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
  *                                             
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the 
@@ -49,6 +49,12 @@
  *     - Fix size of BSS and DATA sections to be multiple of 4
  *     - Add assertion to check that region SRAM_combined does not overflowed no_init section 
  *      
+ * 2017-04-07:
+ *     - Added new symbols __text_size and eText
+ * 
+ * 2017-04-20:
+ *     - Change vtable location to flash area to save ram             
+ *
  * @endcond 
  *
  */
@@ -101,21 +107,35 @@ SECTIONS
         *(.rodata .rodata.*)
         *(.gnu.linkonce.r*)
         
+        *(vtable)
+                
         . = ALIGN(4);        
     } > FLASH_1_cached AT > FLASH_1_uncached
 
+    .eh_frame_hdr : ALIGN (4)
+    {
+      KEEP (*(.eh_frame_hdr))
+    } > FLASH_1_cached AT > FLASH_1_uncached
+  
+    .eh_frame : ALIGN (4)
+    {
+      KEEP (*(.eh_frame))
+    } > FLASH_1_cached AT > FLASH_1_uncached
+
     /* Exception handling, exidx needs a dedicated section */
-    .ARM.extab :
+    .ARM.extab : ALIGN (4)
     {
         *(.ARM.extab* .gnu.linkonce.armextab.*)
     } > FLASH_1_cached AT > FLASH_1_uncached
 
+    . = ALIGN(4);
     __exidx_start = .;
-    .ARM.exidx :
+    .ARM.exidx : ALIGN (4)
     {
         *(.ARM.exidx* .gnu.linkonce.armexidx.*)
     } > FLASH_1_cached AT > FLASH_1_uncached
     __exidx_end = .;
+    . = ALIGN(4);
     
     /* DSRAM layout (Lowest to highest)*/
     Stack (NOLOAD) : 
@@ -173,6 +193,9 @@ SECTIONS
     } > SRAM_combined AT > FLASH_1_uncached
     __data_load = LOADADDR (.data);
     __data_size = __data_end - __data_start;
+        
+    __text_size = (__exidx_end - sText) + __data_size + __ram_code_size;
+    eText = sText + __text_size;
         
     /* BSS section */
     .bss (NOLOAD) : 

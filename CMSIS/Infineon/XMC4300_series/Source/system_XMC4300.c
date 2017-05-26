@@ -1,12 +1,12 @@
 /********************************************************************************************************************
  * @file     system_XMC4300.c
  * @brief    CMSIS Cortex-M4 Device Peripheral Access Layer Header File for the Infineon XMC4300 Device Series
- * @version  V1.0.2
- * @date     01. June 2016
+ * @version  V1.0.3
+ * @date     09. Feb 2017
  *
  * @cond
  *********************************************************************************************************************
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the
@@ -37,6 +37,7 @@
  * V1.0.0, 19. November 2015, Initial version
  * V1.0.1, 26. February 2016, EBU clock removed
  * V1.0.2, 01. Jun 2016, Fix masking of OSCHPCTRL value 
+ * V1.0.3, 09. Feb 2017, Fix activation of USBPLL when SDMMC clock is enabled 
  ******************************************************************************
  * @endcond
  */
@@ -319,7 +320,8 @@
 
 #define ENABLE_USBPLL \
     (((__ECATCLKCR & SCU_CLK_ECATCLKCR_ECATSEL_Msk) == SCU_CLK_ECATCLKCR_ECATSEL_USBPLL) || \
-     (((__CLKSET & SCU_CLK_CLKSET_USBCEN_Msk) != 0) && ((__USBCLKCR & SCU_CLK_USBCLKCR_USBSEL_Msk) == SCU_CLK_USBCLKCR_USBSEL_USBPLL)))
+     (((__CLKSET & SCU_CLK_CLKSET_USBCEN_Msk) != 0) && ((__USBCLKCR & SCU_CLK_USBCLKCR_USBSEL_Msk) == SCU_CLK_USBCLKCR_USBSEL_USBPLL)) || \
+     (((__CLKSET & SCU_CLK_CLKSET_MMCCEN_Msk) != 0) && ((__USBCLKCR & SCU_CLK_USBCLKCR_USBSEL_Msk) == SCU_CLK_USBCLKCR_USBSEL_USBPLL)))
 
 /*******************************************************************************
  * GLOBAL VARIABLES

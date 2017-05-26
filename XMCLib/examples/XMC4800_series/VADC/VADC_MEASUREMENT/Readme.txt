@@ -1,17 +1,16 @@
 Description of example project
 ==============================
-This example project depicts usage of SCU and ADC drivers.
-
-The SCU driver is used to configure the clock settings and take the ADC peripheral out of reset.
-The ADC driver APIs are used to configure GLOBAL, GROUP, QUEUE, CHANNEL and RESULT functional blocks.
-A single queue entry is created and added to the queue.
-ADC conversion is triggered manually. And in the ISR, the interrupt count is bumped up and interrupt
-flags are cleared. The ISR clears the interrupt and the main loop restarts the conversion.
+This is an example depicting usage of the ADC driver.
+The ADC driver is used to configure various functional blocks of the
+peripheral, setting up of a single entry queue and converting the lone
+entry by means of a software generated queue conversion request periodically
+in the SysTick handler. The SysTick timer is configured to fire every 10ms.
+The results are send via UART and can be visualize in a PC using a terminal program
 
 Hardware Setup
 ===============
-XMC4500 XMC4500 CPU Board (No other satellite board required)
-IO Pin : 14.1
+XMC4700/XMC4800 Relax Kit
+IO Pin : 14.7
 
 How to test the application
 ============================
@@ -20,7 +19,7 @@ b. Compile and flash the application onto the device
 c. Add g_num_interrupts to the watch window
 d. Run the application. 
 e. Watch g_num_interrupts steadily increment
-f. Rotate the potentiometer and watch the conversion result change.
+f. Attach a variable voltage source at P14_1 and observe the voltage in the terminal.
 
 How to modify the application
 ==============================

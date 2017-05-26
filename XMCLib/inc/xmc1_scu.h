@@ -1,12 +1,12 @@
 /**
  * @file xmc1_scu.h
- * @date 2016-03-09
+ * @date 2017-03-28
  *
  * @cond
-*********************************************************************************************************************
- * XMClib v2.1.8 - XMC Peripheral Driver Library 
+ *********************************************************************************************************************
+ * XMClib v2.1.12 - XMC Peripheral Driver Library 
  *
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the
@@ -57,6 +57,10 @@
  * 2016-03-09:
  *     - Added XMC_SCU_POWER_EnableMonitor/XMC_SCU_POWER_DisableMonitor
  *
+ * 2017-03-28:
+ *     - Fixed prescaler formula comments for XMC_SCU_CLOCK_EnableDCO1ExtRefCalibration()
+ *     - Added XMC_SCU_SetBMI()
+ *
  * @endcond
  *
  */
@@ -85,7 +89,7 @@
  * MACROS
  ********************************************************************************************************************/
 
-/**
+/*
  * List of events
  */
 #define XMC_SCU_INTERRUPT_EVENT_WDT_WARN         SCU_INTERRUPT_SRMSK_PRWARN_Msk /**< WDT pre-warning event. */
@@ -135,6 +139,35 @@
 #if (UC_SERIES == XMC14) || defined(DOXYGEN)
 #define XMC_SCU_INTERRUPT_EVENT_LOSS_EXT_CLOCK   (((int64_t)SCU_INTERRUPT_SRMSK1_LOECI_Msk) << 32U)  /**< Loss of external OSC_HP clock event. @note Only available for XMC1400 series */
 #define XMC_SCU_INTERRUPT_EVENT_DCO1_OUT_SYNC    (((int64_t)SCU_INTERRUPT_SRMSK1_DCO1OFSI_Msk) << 32U)   /**< DCO1 Out of SYNC Event.  @note Only available for XMC1400 series */
+#endif
+
+/*
+ *  These are the flags which may be passed to XMC_SCU_SetBMI().
+ */
+#if defined(CAN) || defined(DOXYGEN)
+#define XMC_SCU_BMI_HWCFG_CAN_BSL      (0x0080U) /**< CAN Bootstrap Loader Start-up Mode */
+#define XMC_SCU_BMI_HWCFG_CAN_BSLTO    (0x0090U) /**< CAN Bootstrap Loader Start-up Mode with time-out */
+#define XMC_SCU_BMI_HWCFG_SBSL_CANOPEN (0x00A0U) /**< Secure Bootstrap Loader Start-up Mode over CANopen */
+#endif
+
+#define XMC_SCU_BMI_HWCFG_ASC_BSL      (0x00C0U) /**< ASC Bootstrap Loader Start-up Mode */
+#define XMC_SCU_BMI_HWCFG_UPM          (0x00C1U) /**< User productive Start-up Mode */
+#define XMC_SCU_BMI_HWCFG_UMD          (0x00C3U) /**< User Start-up Mode with debug enabled */
+#define XMC_SCU_BMI_HWCFG_UMHAR        (0x00C7U) /**< User Start-up Mode with debug enabled and halt after reset (HAR) */
+#define XMC_SCU_BMI_HWCFG_SSC_BSL      (0x00C8U) /**< SSC Bootstrap Loader Start-up Mode */
+#define XMC_SCU_BMI_HWCFG_ASC_BSLTO    (0x00D0U) /**< ASC BSL Start-up Mode with time-out */
+#define XMC_SCU_BMI_HWCFG_SSC_BSLTO    (0x00D8U) /**< SSC BSL Start-up Mode with time-out */
+#define XMC_SCU_BMI_HWCFG_SBSL         (0x00FAU) /**< Secure Bootstrap Loader Start-up Mode over ASC */
+
+#define XMC_SCU_BMI_DAPTYP_SWD         (0U << 8) /**< Serial wire debug (SWD) interface is selected */
+#define XMC_SCU_BMI_DAPTYP_SPD         (1U << 8) /**< Single pin debug (SPD) interface is selected */
+
+#define XMC_SCU_BMI_DAPDIS_CHANNEL_0   (0U << 9) /**< SWD/SPD_0 pin is selected */
+#define XMC_SCU_BMI_DAPDIS_CHANNEL_1   (1U << 9) /**< SWD/SPD_1 pin is selected */
+
+#if defined(CAN) || defined(DOXYGEN)
+#define XMC_SCU_BMI_CANCLK_DCO1        (0U << 11) /**< Synchronous CAN clock via internal oscillator (DCO1) with enabled trimming via external reference is selected */
+#define XMC_SCU_BMI_CANCLK_OSCHP       (1U << 11) /**< Synchronous CAN clock via external oscillator (OSC_HP) is selected */
 #endif
 
 /*********************************************************************************************************************
@@ -653,7 +686,6 @@ typedef enum XMC_SCU_POWER_MONITOR_DELAY
   XMC_SCU_POWER_MONITOR_DELAY_NONE = 3U << SCU_ANALOG_ANAVDEL_VDEL_TIM_ADJ_Pos   /**< */
 } XMC_SCU_POWER_MONITOR_DELAY_t;
 
-
 /*********************************************************************************************************************
  * DATA STRUCTURES
  ********************************************************************************************************************/
@@ -1008,8 +1040,6 @@ uint32_t XMC_SCU_CalcTemperature(void);
 
 /**
  *
- * @param None
- *
  * @return true DTS Measurement Done
  * @return false DTS Measurement not Done
  *
@@ -1109,7 +1139,7 @@ void XMC_SCU_CLOCK_CalibrateOscillatorOnTemperature(int32_t temperature);
 /**
  *
  * @param sync_clk Clock source selected as external reference. @ref XMC_SCU_CLOCK_SYNC_CLKSRC_t
- * @param prescaler integer(\f$\frac{300 \times f_{OSC}[MHz]}{48}\f$)
+ * @param prescaler integer(\f$\frac{3000 \times f_{OSC}[MHz]}{48}\f$)
  * @param syn_preload integer(\f$\frac{48 \times prescaler}{f_{OSC}[MHz]}\f$)
  *
  * @return None
@@ -1123,8 +1153,6 @@ void XMC_SCU_CLOCK_EnableDCO1ExtRefCalibration(XMC_SCU_CLOCK_SYNC_CLKSRC_t sync_
 
 /**
  *
- * @param None
- *
  * @return None
  * 
  * \par<b>Description</b><br>
@@ -1134,8 +1162,6 @@ void XMC_SCU_CLOCK_EnableDCO1ExtRefCalibration(XMC_SCU_CLOCK_SYNC_CLKSRC_t sync_
 void XMC_SCU_CLOCK_DisableDCO1ExtRefCalibration(void);
 
 /**
- *
- * @param None
  *
  * @return true DCO1 is synchronized to the selected XTAL frequency
  * @return false Actual DCO1 frequency is out of target
@@ -1148,8 +1174,6 @@ bool XMC_SCU_CLOCK_IsDCO1ExtRefCalibrationReady(void);
 
 /**
  *
- * @param None
- *
  * @return None
  * 
  * \par<b>Description</b><br>
@@ -1159,8 +1183,6 @@ bool XMC_SCU_CLOCK_IsDCO1ExtRefCalibrationReady(void);
 void XMC_SCU_CLOCK_EnableDCO1OscillatorWatchdog(void);
 
 /**
- *
- * @param None
  *
  * @return None
  * 
@@ -1172,8 +1194,6 @@ void XMC_SCU_CLOCK_DisableDCO1OscillatorWatchdog(void);
 
 /**
  *
- * @param None
- *
  * @return None
  * 
  * \par<b>Description</b><br>
@@ -1183,8 +1203,6 @@ void XMC_SCU_CLOCK_DisableDCO1OscillatorWatchdog(void);
 void XMC_SCU_CLOCK_ClearDCO1OscillatorWatchdogStatus(void);
 
 /*
- *
- * @param None
  *
  * @return true The OSC frequency is usable
  * @return false The OSC frequency is not usable. Frequency is too high or too low
@@ -1234,8 +1252,16 @@ __STATIC_INLINE void XMC_SCU_DisablePrefetchUnit(void)
 
 #endif
 
-/** TODO
- * Note: Brown Out Trap need to be enabled
+/** 
+ *
+ * @param range VDEL Range Select ::XMC_SCU_POWER_MONITOR_RANGE_t
+ * @param delay VDEL Timing Setting ::XMC_SCU_POWER_MONITOR_DELAY_t
+ * @return None
+ *
+ * \par<b>Description</b><br>
+ * Enables VDEL detector. VDEL detector compares the supply voltage against a pre-warning threshold voltage
+ *
+ * @note Brown Out Trap need to be enabled previously
  */
 __STATIC_INLINE void XMC_SCU_POWER_EnableMonitor(XMC_SCU_POWER_MONITOR_RANGE_t range, XMC_SCU_POWER_MONITOR_DELAY_t delay)
 {
@@ -1244,13 +1270,59 @@ __STATIC_INLINE void XMC_SCU_POWER_EnableMonitor(XMC_SCU_POWER_MONITOR_RANGE_t r
                         (uint32_t)delay;
 }
 
-/** TODO
+/**
  *
+ * @return None
+ *
+ * \par<b>Description</b><br>
+ * Disables VDEL detector
  */
 __STATIC_INLINE void XMC_SCU_POWER_DisableMonitor(void)
 {
   SCU_ANALOG->ANAVDEL &= ~SCU_ANALOG_ANAVDEL_VDEL_EN_Msk; 
 }
+
+/**
+ *
+ * @param flags may be any of: <br>
+ *             \ref XMC_SCU_BMI_HWCFG_CAN_BSL (only available for XMC1400 series with CAN Module)<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_CAN_BSLTO (only available for XMC1400 series with CAN Module)<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_SBSL_CANOPEN (only available for XMC1400 series with CAN Module)<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_ASC_BSL<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_UPM<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_UMD<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_UMHAR<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_SSC_BSL<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_ASC_BSLTO<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_SSC_BSLTO<br> 
+ *             \ref XMC_SCU_BMI_HWCFG_SBSL<br><br>
+ *        optionally OR'd together with any of: <br> 
+ *             \ref XMC_SCU_BMI_DAPTYP_SWD<br> 
+ *             \ref XMC_SCU_BMI_DAPTYP_SPD<br><br> 
+ *        optionally OR'd together with any of: <br> 
+ *             \ref XMC_SCU_BMI_DAPDIS_CHANNEL_0<br> 
+ *             \ref XMC_SCU_BMI_DAPDIS_CHANNEL_1<br><br>
+ * @image html "xmc1000_debugif.png"
+ *        optionally OR'd together with any of (only available for XMC1400 series with CAN Module): <br> 
+ *             \ref XMC_SCU_BMI_CANCLK_DCO1<br> 
+ *             \ref XMC_SCU_BMI_CANCLK_OSCHP<br><br>
+ *
+ * @param timeout Only relevant if a start up mode is selected that uses timeout. The time-out duration is BSLTO*2664000 MCLK cycles, the supported time-out range is 0.3-5s (333...4995ms)
+ * @return false only upon error, if OK the procedure triggers a reset and does not return to calling routine
+ *
+ * \par<b>Description</b><br>
+ * This procedure initiates installation of a new BMI value. In particular, it can be used as
+ * well as to restore the state upon delivery for a device already in User Productive mode.
+ * 
+ * @code
+ *   // Switch to ASC Bootstrap Loader
+ *   XMC_SCU_SetBMI(XMC_SCU_BMI_HWCFG_ASC_BSL, 0);
+ *
+ *   // Switch to Debug user mode SWD1 (pins P1.3 and P1.2)
+ *   XMC_SCU_SetBMI(XMC_SCU_BMI_HWCFG_UMD | XMC_SCU_BMI_DAPTYP_SWD | XMC_SCU_BMI_DAPDIS_CHANNEL_1, 0);
+ * @endcode
+ */
+uint32_t XMC_SCU_SetBMI(uint32_t flags, uint8_t timeout);
 
 #ifdef __cplusplus
 }

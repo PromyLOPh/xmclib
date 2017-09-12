@@ -1,8 +1,8 @@
 /********************************************************************************************************************
  * @file     system_XMC4300.c
  * @brief    CMSIS Cortex-M4 Device Peripheral Access Layer Header File for the Infineon XMC4300 Device Series
- * @version  V1.0.3
- * @date     09. Feb 2017
+ * @version  V1.0.4
+ * @date     19. Jun 2017
  *
  * @cond
  *********************************************************************************************************************
@@ -38,6 +38,8 @@
  * V1.0.1, 26. February 2016, EBU clock removed
  * V1.0.2, 01. Jun 2016, Fix masking of OSCHPCTRL value 
  * V1.0.3, 09. Feb 2017, Fix activation of USBPLL when SDMMC clock is enabled 
+ * V1.0.4, 19. Jun 2017, Rely on cmsis_compiler.h instead of defining __WEAK 
+ *                       Added support for ARM Compiler 6 (armclang) 
  ******************************************************************************
  * @endcond
  */
@@ -67,21 +69,7 @@
 /*******************************************************************************
  * MACROS
  *******************************************************************************/
-
 #define CHIPID_LOC ((uint8_t *)0x20000000UL)
-
-/* Define WEAK attribute */
-#if !defined(__WEAK)
-#if defined ( __CC_ARM )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __ICCARM__ )
-#define __WEAK __weak
-#elif defined ( __GNUC__ )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __TASKING__ )
-#define __WEAK __attribute__ ((weak))
-#endif
-#endif
 
 #define PMU_FLASH_WS          (0x4U)
 
@@ -329,6 +317,9 @@
 #if defined ( __CC_ARM )
 uint32_t SystemCoreClock __attribute__((at(0x2000FFC0)));
 uint8_t g_chipid[16] __attribute__((at(0x2000FFC4)));
+#elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+uint32_t SystemCoreClock __attribute__((section(".ARM.__at_0x2000FFC0")));
+uint8_t g_chipid[16] __attribute__((section(".ARM.__at_0x2000FFC4")));
 #elif defined ( __ICCARM__ )
 __no_init uint32_t SystemCoreClock;
 __no_init uint8_t g_chipid[16];

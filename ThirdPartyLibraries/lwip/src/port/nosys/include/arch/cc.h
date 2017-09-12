@@ -34,7 +34,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
+
 #include <xmc_common.h>
+
+#define LWIP_TIMEVAL_PRIVATE    0
 
 #define LWIP_PROVIDE_ERRNO
 

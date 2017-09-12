@@ -39,7 +39,9 @@ extern "C" {
 #define TCP_SND_BUF             (4 * TCP_MSS)
 #define TCP_SND_QUEUELEN        8
 
-#define LWIP_STATS 0
+#define IP_OPTIONS_ALLOWED      0
+#define IP_FRAG                 0
+#define IP_REASSEMBLY           0
 
 #define CHECKSUM_GEN_IP         0
 #define CHECKSUM_GEN_UDP        0
@@ -49,6 +51,7 @@ extern "C" {
 #define CHECKSUM_CHECK_UDP      0
 #define CHECKSUM_CHECK_TCP      0
 
+#define MEMP_NUM_SYS_TIMEOUT    (LWIP_TCP + IP_REASSEMBLY + LWIP_ARP + (2*LWIP_DHCP) + LWIP_AUTOIP + LWIP_IGMP + LWIP_DNS + (PPP_SUPPORT*6*MEMP_NUM_PPP_PCB) + (LWIP_IPV6 ? (1 + LWIP_IPV6_REASS + LWIP_IPV6_MLD) : 0) + 5)
 
 #ifdef __cplusplus
 }

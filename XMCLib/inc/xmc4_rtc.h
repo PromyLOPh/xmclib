@@ -4,7 +4,7 @@
  *
  * @cond
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library 
+ * XMClib v2.1.16 - XMC Peripheral Driver Library 
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
@@ -101,10 +101,7 @@ extern "C" {
  * \par<b>Related APIs:</b><br>
  * XMC_RTC_DisableHibernationWakeUp()
  */
-__STATIC_INLINE void XMC_RTC_EnableHibernationWakeUp(const uint32_t event)
-{
-  RTC->CTR |= event;
-}
+void XMC_RTC_EnableHibernationWakeUp(const uint32_t event);
 
 /**
  * @param event A valid RTC Wakeup event (::XMC_RTC_WAKEUP_EVENT_t) or a valid combination of
@@ -122,10 +119,7 @@ __STATIC_INLINE void XMC_RTC_EnableHibernationWakeUp(const uint32_t event)
  * \par<b>Related APIs:</b><br>
  * XMC_RTC_EnableHibernationWakeUp()
  */
-__STATIC_INLINE void XMC_RTC_DisableHibernationWakeUp(const uint32_t event)
-{
-  RTC->CTR &= ~event;
-}
+void XMC_RTC_DisableHibernationWakeUp(const uint32_t event);
 
 #ifdef __cplusplus
 }

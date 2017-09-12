@@ -3,7 +3,7 @@
  * @date 2016-06-30
  *
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library
+ * XMClib v2.1.16 - XMC Peripheral Driver Library
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        

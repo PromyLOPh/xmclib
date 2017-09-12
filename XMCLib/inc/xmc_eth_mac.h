@@ -1,11 +1,11 @@
 
 /**
  * @file xmc_eth_mac.h
- * @date 2017-04-17
+ * @date 2017-08-07
  *
  * @cond
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library 
+ * XMClib v2.1.16 - XMC Peripheral Driver Library 
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
@@ -63,6 +63,9 @@
  *
  * 2017-04-17:
  *     - Fixed ordering of PTP nanoseconds and seconds in XMC_ETH_MAC_DMA_DESC_t
+ *
+ * 2017-08-07:
+ *     - Added XMC_ETH_MAC_TIMESTAMP_STATUS_t
  *
  * @endcond
  */
@@ -281,6 +284,17 @@ typedef enum XMC_ETH_MAC_TIMESTAMP_CONFIG
   XMC_ETH_MAC_TIMESTAMP_CONFIG_ENABLE_PTP_OVER_IPV4 = ETH_TIMESTAMP_CONTROL_TSIPV4ENA_Msk,   /**< PTP over IPV4 */
   XMC_ETH_MAC_TIMESTAMP_CONFIG_ENABLE_MAC_ADDRESS_FILTER = ETH_TIMESTAMP_CONTROL_TSENMACADDR_Msk /**< MAC address filter */
 } XMC_ETH_MAC_TIMESTAMP_CONFIG_t;
+
+/**
+ * ETH MAC time-stamp status
+ */
+typedef enum XMC_ETH_MAC_TIMESTAMP_STATUS
+{
+  XMC_ETH_MAC_TIMESTAMP_STATUS_SECONDS_OVERFLOW = ETH_TIMESTAMP_STATUS_TSSOVF_Msk,           /**< Indicates that the seconds value of the timestamp has overflowed beyond 0xFFFFFFFF */
+  XMC_ETH_MAC_TIMESTAMP_STATUS_TARGET_TIME_REACHED = ETH_TIMESTAMP_STATUS_TSTARGT_Msk,       /**< Indicates that the value of system time is greater or equal to the value specified in the Target_Time_ Seconds Register and Target Time Nanoseconds Register */
+  XMC_ETH_MAC_TIMESTAMP_STATUS_TARGET_TIMER_ERROR = ETH_TIMESTAMP_STATUS_TSTRGTERR_Msk,      /**< Set when the target time, being programmed in Target Time Registers, is already elapsed */
+} XMC_ETH_MAC_TIMESTAMP_STATUS_t;
+
 
 /**********************************************************************************************************************
  * DATA STRUCTURES

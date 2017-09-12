@@ -1,12 +1,12 @@
 /*********************************************************************************************************************
  * @file     system_XMC1400.c
  * @brief    Device specific initialization for the XMC1400-Series according to CMSIS
- * @version  V1.1
- * @date     09 Dec 2015
+ * @version  V1.2
+ * @date     19 Jun 2017
  *
  * @cond
  *********************************************************************************************************************
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the
@@ -37,6 +37,8 @@
  * V1.0, 03 Sep 2015, JFT : Initial version
  *                          MCLK = 48MHz, PCLK = 96MHz
  * V1.1, 09 Dec 2015, JFT : Enable prefetch unit
+ * V1.2, 19 Jun 2017, Rely on cmsis_compiler.h instead of defining __WEAK
+ *                    Added support for ARM Compiler 6 (armclang) 
  *
  * @endcond
  */
@@ -51,20 +53,6 @@
 /*******************************************************************************
  * MACROS
  *******************************************************************************/
-
-/* Define WEAK attribute */
-#if !defined(__WEAK)
-#if defined ( __CC_ARM )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __ICCARM__ )
-#define __WEAK __weak
-#elif defined ( __GNUC__ )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __TASKING__ )
-#define __WEAK __attribute__ ((weak))
-#endif
-#endif
-
 #define DCO1_FREQUENCY (48000000U)
 
 /*
@@ -135,6 +123,8 @@
 
 #if defined ( __CC_ARM )
 uint32_t SystemCoreClock __attribute__((at(0x20003FFC)));
+#elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+uint32_t SystemCoreClock __attribute__((section(".ARM.__at_0x20003FFC")));
 #elif defined ( __ICCARM__ )
 __no_init uint32_t SystemCoreClock;
 #elif defined ( __GNUC__ )

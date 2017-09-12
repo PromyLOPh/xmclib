@@ -1,10 +1,10 @@
 /**
  * @file xmc1_scu.c
- * @date 2017-04-11
+ * @date 2017-06-24
  *
  * @cond
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library 
+ * XMClib v2.1.16 - XMC Peripheral Driver Library 
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.
@@ -67,6 +67,9 @@
  *
  * 2017-04-11:
  *     - Added XMC_SCU_SetBMI()
+ *
+ * 2017-06-24
+ *     - Changed XMC_SCU_SetBMI() for XMC11/XMC12/XMC13 to set to 1 the bit 11 of BMI
  *
  * @endcond
  *
@@ -857,7 +860,11 @@ void XMC_SCU_IRQHandler(uint32_t sr_num)
 /* Install BMI */
 uint32_t XMC_SCU_SetBMI(uint32_t flags, uint8_t timeout)
 {
+#if (UC_SERIES == XMC14)
   return ROM_BmiInstallationReq((flags & 0x0fffU) | ((timeout << 12) & 0xf000U));
+#else
+  return ROM_BmiInstallationReq((flags & 0x07ffU) | ((timeout << 12) & 0xf000U) | 0x0800U);
+#endif
 }
 
 #if (UC_SERIES == XMC14)

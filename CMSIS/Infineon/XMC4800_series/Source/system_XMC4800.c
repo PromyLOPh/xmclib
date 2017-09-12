@@ -1,8 +1,8 @@
 /*********************************************************************************************************************
  * @file     system_XMC4800.c
  * @brief    CMSIS Cortex-M4 Device Peripheral Access Layer Header File for the Infineon XMC4800 Device Series
- * @version  V1.0.3
- * @date     09. Feb 2017
+ * @version  V1.0.4
+ * @date     19. Jun 2017
  *
  * @cond
  *********************************************************************************************************************
@@ -38,6 +38,7 @@
  * V1.0.1, 26. Jan 2016, Disable trap generation from clock unit
  * V1.0.2, 01. Jun 2016, Fix masking of OSCHPCTRL value
  * V1.0.3, 09. Feb 2017, Fix activation of USBPLL when SDMMC clock is enabled 
+ * V1.0.4, 19. Jun 2017, Rely on cmsis_compiler.h instead of defining __WEAK
  ******************************************************************************
 * @endcond
 */
@@ -67,21 +68,7 @@
 /*******************************************************************************
  * MACROS
  *******************************************************************************/
-
 #define CHIPID_LOC ((uint8_t *)0x20000000UL)
-
-/* Define WEAK attribute */
-#if !defined(__WEAK)
-#if defined ( __CC_ARM )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __ICCARM__ )
-#define __WEAK __weak
-#elif defined ( __GNUC__ )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __TASKING__ )
-#define __WEAK __attribute__ ((weak))
-#endif
-#endif
 
 #define PMU_FLASH_WS          (0x4U)
 
@@ -344,7 +331,20 @@ uint32_t SystemCoreClock __attribute__((at(0x2001FFC0)));
 uint8_t g_chipid[16] __attribute__((at(0x2001FFC4)));
 #else
 #error "system_XMC4800.c: device not supported" 
-#endif    
+#endif
+#elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+#if defined(XMC4800_E196x2048) || defined(XMC4800_F144x2048) || defined(XMC4800_F100x2048)
+uint32_t SystemCoreClock __attribute__((section(".ARM.__at_0x2003FFC0")));
+uint8_t g_chipid[16] __attribute__((section(".ARM.__at_0x2003FFC0")));
+#elif defined(XMC4800_E196x1536) || defined(XMC4800_F144x1536) || defined(XMC4800_F100x1536)
+uint32_t SystemCoreClock __attribute__((section(".ARM.__at_0x2002CFC0")));
+uint8_t g_chipid[16] __attribute__((section(".ARM.__at_0x2002CFC4")));
+#elif defined(XMC4800_E196x1024) || defined(XMC4800_F144x1024) || defined(XMC4800_F100x1024)
+uint32_t SystemCoreClock __attribute__((section(".ARM.__at_0x2001FFC0")));
+uint8_t g_chipid[16] __attribute__((section(".ARM.__at_0x2001FFC4")));
+#else
+#error "system_XMC4800.c: device not supported" 
+#endif
 #elif defined ( __ICCARM__ )
 #if defined(XMC4800_E196x2048) || defined(XMC4800_F144x2048) || defined(XMC4800_F100x2048) || \
     defined(XMC4800_E196x1536) || defined(XMC4800_F144x1536) || defined(XMC4800_F100x1536) || \

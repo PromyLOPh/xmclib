@@ -2,6 +2,41 @@
  * @page Changelog
  *
  * @tableofcontents
+ * @section v2116 Version 2.1.16
+ * @subsection COMMON COMMON
+ * - Added:
+ *     - Added __RAM_FUNC macro
+ *
+ * @subsection SCU SCU
+ * - Changed:
+ *     - Removed unused XMC_SCU_CLOCK_DEEP_SLEEP_t
+ *     - Added XMC_SCU_CLOCK_EnableFlashPowerDown() and XMC_SCU_CLOCK_DisableFlashPowerDown()
+ *
+ * @subsection ADC ADC
+ * - Added:
+ *     - XMC_VADC_GLOBAL_SHS_SetAnalogReference()
+ *
+ * @section v2114 Version 2.1.14
+ * @subsection CCU8 CCU8
+ * - Changed:
+ *     - XMC_CCU8_SLICE_SetPrescaler() changed div_val parameter to type XMC_CCU8_SLICE_PRESCALER_t 
+ *
+ * @subsection CCU4 CCU4
+ * - Changed:
+ *     - XMC_CCU4_SLICE_SetPrescaler() changed div_val parameter to type XMC_CCU4_SLICE_PRESCALER_t 
+ *
+ * @subsection SCU SCU
+ * - Changed:
+ *     - XMC_SCU_SetBMI() changed for XMC11/XMC12/XMC13 to set to 1 the bit 11 of BMI
+ *
+ * @subsection ADC ADC
+ * - Added:
+ *     - XMC_VADC_GLOBAL_SHS_SetAnalogReference()
+ *
+ * @subsection POSIF POSIF
+ * - Added:
+ *     - Added posif connectivity map file
+ *
  * @section v2112 Version 2.1.12
  * @subsection SCU SCU
  * - Fixed:

@@ -1,5 +1,5 @@
 /*********************************************************************************************************************
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
  *                                             
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the 
@@ -33,11 +33,12 @@
  * @brief    CMSIS Cortex-M4 Peripheral Access Layer Header File for
  *           XMC4300 from Infineon.
  *
- * @version  V1.1.0 (Reference Manual v1.1)
- * @date     30. August 2016
+ * @version  V1.1.1 (Reference Manual v1.1)
+ * @date     19. June 2017
  *
  * @note     Generated with SVDConv V2.87l 
  *           from CMSIS SVD File 'XMC4300_Processed_SVD.xml' Version 1.1.0 (Reference Manual v1.1),
+ *           added support for ARM Compiler 6 (armclang)  
  *******************************************************************************************************/
 
 
@@ -96,7 +97,8 @@ typedef enum {
   VADC0_G1_0_IRQn               =  22,              /*!<  22  VADC0_G1_0                                                       */
   VADC0_G1_1_IRQn               =  23,              /*!<  23  VADC0_G1_1                                                       */
   VADC0_G1_2_IRQn               =  24,              /*!<  24  VADC0_G1_2                                                       */
-  VADC0_G1_3_IRQn               =  25,              /*!<  25  VADC0_G1_3   													   */         DAC0_0_IRQn                   =  42,              /*!<  42  DAC0_0                                                           */
+  VADC0_G1_3_IRQn               =  25,              /*!<  25  VADC0_G1_3   													                           */         
+  DAC0_0_IRQn                   =  42,              /*!<  42  DAC0_0                                                           */
   DAC0_1_IRQn                   =  43,              /*!<  43  DAC0_1                                                           */
   CCU40_0_IRQn                  =  44,              /*!<  44  CCU40_0                                                          */
   CCU40_1_IRQn                  =  45,              /*!<  45  CCU40_1                                                          */
@@ -276,6 +278,10 @@ reg = (uint##size##_t) (VAL2 | VAL4);\
 #if defined(__CC_ARM)
   #pragma push
   #pragma anon_unions
+#elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+  #pragma clang diagnostic push
+  #pragma clang diagnostic ignored "-Wc11-extensions"
+  #pragma clang diagnostic ignored "-Wreserved-id-macro"
 #elif defined(__ICCARM__)
   #pragma language=extended
 #elif defined(__GNUC__)
@@ -2293,6 +2299,8 @@ typedef struct {                                    /*!< (@ 0x48028F00) PORT15 S
 /* --------------------  End of section using anonymous unions  ------------------- */
 #if defined(__CC_ARM)
   #pragma pop
+#elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+  #pragma clang diagnostic pop
 #elif defined(__ICCARM__)
   /* leave anonymous unions enabled */
 #elif defined(__GNUC__)

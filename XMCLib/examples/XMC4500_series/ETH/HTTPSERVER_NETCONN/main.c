@@ -16,8 +16,8 @@
 
 /**
  * @file
- * @date 13 April,2017
- * @version 1.1.0
+ * @date 07 August,2017
+ * @version 1.2.0
  *
  * @brief ETH HTTP server demo example using the netconn interface
  *
@@ -32,6 +32,9 @@
  * Version 1.1.0
  * - lwIP 2.0.2
  *
+ * Version 1.2.0
+ * - Changed the way the interface features are assigned
+ * 
  */
 
 #include "xmc_gpio.h"
@@ -107,15 +110,6 @@ void LWIP_Init(void)
   /* Initialize interface status change callback */
   netif_set_status_callback(&xnetif, ETH_NETIF_STATUS_CB_FUNCTION);
 #endif
-
-  /* device capabilities */
-  xnetif.flags |= NETIF_FLAG_ETHARP;
-
-#if LWIP_DHCP == 1
-  /* Enable DHCP flag if DHCP is configured*/
-  xnetif.flags |= NETIF_FLAG_DHCP;
-#endif
-
 }
 
 void led1_task(void const *args)

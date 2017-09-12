@@ -111,7 +111,7 @@ static XMC_ETH_PHY_CONFIG_t eth_phy_config =
   .enable_auto_negotiate = true
 };
 
-static XMC_ETH_MAC_t eth_mac =
+XMC_ETH_MAC_t eth_mac =
 {
   .regs = ETH0,
   .address = MAC_ADDR,
@@ -203,15 +203,14 @@ static void ethernetif_link_callback(struct netif *netif)
     XMC_ETH_MAC_EnableTx(&eth_mac);
     XMC_ETH_MAC_EnableRx(&eth_mac);
 
+    netif_set_up(&xnetif);
+
 #if LWIP_DHCP == 1
     /* Start DHCP query */
     dhcp_start(&xnetif);
 #elif LWIP_AUTOIP == 1
     /* Start AUTOIP probing */
     autoip_start(&xnetif);
-#else
-    /* When the netif is fully configured this function must be called. */
-    netif_set_up(&xnetif);
 #endif
 
   }
@@ -224,15 +223,14 @@ static void ethernetif_link_callback(struct netif *netif)
     XMC_ETH_MAC_DisableTx(&eth_mac);
     XMC_ETH_MAC_DisableRx(&eth_mac);
 
+   netif_set_down(&xnetif);
+
 #if LWIP_DHCP == 1
     /* Stop DHCP query */
     dhcp_stop(&xnetif);
 #elif LWIP_AUTOIP == 1
     /* Stop AUTOIP probing */
     autoip_stop(&xnetif);
-#else
-    /* When the netif link is down, set the status down. */
-    netif_set_down(&xnetif);
 #endif
 
   }
@@ -434,11 +432,13 @@ low_level_input(void)
 #if ETH_PAD_SIZE
         pbuf_header(p, ETH_PAD_SIZE);    /* Reclaim the padding word */
 #endif
-  
+        XMC_ETH_MAC_ReturnRxDescriptor(&eth_mac);  
       }
     }
-
-    XMC_ETH_MAC_ReturnRxDescriptor(&eth_mac);
+    else
+    {
+      XMC_ETH_MAC_ReturnRxDescriptor(&eth_mac);  
+    }
   }
 
   XMC_ETH_MAC_ResumeRx(&eth_mac);
@@ -523,6 +523,9 @@ ethernetif_init(struct netif *netif)
   /* initialize the hardware */
   low_level_init(netif);
 
+  /* device capabilities */
+  xnetif.flags = NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP;
+
   sys_timeout(1000U, ethernetif_link_status, NULL);
 
   netif_set_link_callback(netif, ethernetif_link_callback);
@@ -530,8 +533,15 @@ ethernetif_init(struct netif *netif)
   return ERR_OK;
 }
 
+__WEAK void ETH0_0_UserIRQHandler(void)
+{
+
+}
+
 void ETH0_0_IRQHandler(void)
 {
   XMC_ETH_MAC_ClearEventStatus(&eth_mac, XMC_ETH_MAC_EVENT_RECEIVE);
   ethernetif_input(&xnetif);
+
+  ETH0_0_UserIRQHandler();
 }

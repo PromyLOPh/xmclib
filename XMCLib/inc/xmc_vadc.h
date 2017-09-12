@@ -1,10 +1,10 @@
 /**
  * @file xmc_vadc.h
- * @date 2017-02-06
+ * @date 2017-06-24
  *
  * @cond
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library 
+ * XMClib v2.1.16 - XMC Peripheral Driver Library 
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
@@ -105,6 +105,9 @@
  *
  * 2017-02-06:
  *     - Added new functions to remove channels from background request source, XMC_VADC_GLOBAL_BackgroundRemoveChannelFromSequence() and XMC_VADC_GLOBAL_BackgndRemoveMultipleChannels()
+ *
+ * 2017-06-24:
+ *     - Added new function XMC_VADC_GLOBAL_SHS_SetAnalogReference() for XMC1 family
  *
  * @endcond 
  *
@@ -703,6 +706,16 @@ typedef enum XMC_VADC_CHANNEL_ALIAS
 
 #if(XMC_VADC_SHS_AVAILABLE == 1U)
 
+/**
+ * Selection of the reference voltage that is required for conversions (VREF).
+ */
+typedef enum XMC_VADC_GLOBAL_SHS_AREF
+{
+  XMC_VADC_GLOBAL_SHS_AREF_EXTERNAL_VDD_UPPER_RANGE = 0, /**< External reference, upper supply range, e.g. VDD >= 3.0V */
+  XMC_VADC_GLOBAL_SHS_AREF_INTERNAL_VDD_UPPER_RANGE = 2, /**< Internal reference, upper supply range, e.g. VDD >= 3.0V  */
+  XMC_VADC_GLOBAL_SHS_AREF_INTERNAL_VDD_LOWER_RANGE = 3, /**< Internal reference, lower supply range, e.g. VDD <  3.0V  */
+} XMC_VADC_GLOBAL_SHS_AREF_t;
+
 #if(XMC_VADC_SHS_FULL_SET_REG == 1U)
 /**
  * Defines the gain calibration selection.
@@ -1272,10 +1285,13 @@ typedef struct XMC_VADC_GLOBAL_SHS_CONFIG
   {
     struct
     {
+#if(XMC_VADC_SHS_FULL_SET_REG == 1U)
       uint32_t shs_clock_divider        :4; /**< The divider value for the SHS clock. Range: [0x0 to 0xF]*/
       uint32_t                          :6;
-      uint32_t analog_reference_select  :2; /**< It is possible to different reference voltage for the SHS module
-                                                 */
+#else
+      uint32_t                          :10;
+#endif      
+      uint32_t analog_reference_select  :2; /**< It is possible to different reference voltage for the SHS modules*/
       uint32_t                          :20;
     };
     uint32_t shscfg;
@@ -1880,6 +1896,27 @@ void XMC_VADC_GLOBAL_BackgroundSetReqSrcEventInterruptNode(XMC_VADC_GLOBAL_t *co
  * None.
  */
  void XMC_VADC_GLOBAL_SHS_Init(XMC_VADC_GLOBAL_SHS_t *const shs_ptr, const XMC_VADC_GLOBAL_SHS_CONFIG_t *config);
+
+/**
+ * @param shs_ptr Constant pointer to the VADC Sample and hold module
+ * @param aref    Analog reference used for conversions. Refer @ref XMC_VADC_GLOBAL_SHS_AREF_t enum
+ *
+ * @return None
+ *
+ * \par<b>Description:</b><br>
+ * Selection of the reference voltage that is required for conversions (VREF).
+ *
+ * \par<b>Related APIs:</b><BR>
+ * None.
+ */
+ __STATIC_INLINE void XMC_VADC_GLOBAL_SHS_SetAnalogReference(XMC_VADC_GLOBAL_SHS_t *const shs_ptr,
+                                                            const XMC_VADC_GLOBAL_SHS_AREF_t aref)
+ {
+  XMC_ASSERT("XMC_VADC_GLOBAL_SHS_StepperInit:Wrong SHS Pointer",
+             (shs_ptr == (XMC_VADC_GLOBAL_SHS_t*)(void*)SHS0))
+
+  shs_ptr->SHSCFG |=  (shs_ptr->SHSCFG & (uint32_t)~SHS_SHSCFG_AREF_Msk) | (uint32_t)aref;  
+ }
 
 #if(XMC_VADC_SHS_FULL_SET_REG == 1U)
  /**

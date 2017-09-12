@@ -1,10 +1,10 @@
 /**
  * @file xmc_ccu8.c
- * @date 2017-02-25
+ * @date 2017-04-27
  *
  * @cond
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library 
+ * XMClib v2.1.16 - XMC Peripheral Driver Library 
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
@@ -60,6 +60,9 @@
  *
  * 2017-02-25:
  *     - XMC_CCU8_lAssertReset(), XMC_CCU8_lDeassertReset(), XMC_CCU8_lGateClock() and XMC_CCU8_lUngateClock() fix compilation warnings.
+ *
+ * 2017-04-27:
+ *     - XMC_CCU8_SLICE_SetPrescaler() changed div_val parameter to type XMC_CCU8_SLICE_PRESCALER_t 
  *
  * @endcond
  */
@@ -1117,7 +1120,7 @@ void XMC_CCU8_SLICE_EnableDithering(XMC_CCU8_SLICE_t *const slice,
 }
 
 /* Programs Pre-scaler divider  */
-void XMC_CCU8_SLICE_SetPrescaler(XMC_CCU8_SLICE_t *const slice, const uint8_t div_val)
+void XMC_CCU8_SLICE_SetPrescaler(XMC_CCU8_SLICE_t *const slice, const XMC_CCU8_SLICE_PRESCALER_t div_val)
 {
   uint32_t fpc;
 

@@ -1,11 +1,11 @@
 
 /**
  * @file xmc_eth_mac.c
- * @date 2017-04-17
+ * @date 2017-08-03
  *
  * @cond
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library
+ * XMClib v2.1.16 - XMC Peripheral Driver Library
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.                        
@@ -81,6 +81,13 @@
  *
  * 2017-04-17:
  *     - Changed XMC_ETH_MAC_GetTxTimeStamp() and XMC_ETH_MAC_GetRxTimeStamp() return the timestamp depending on status bit in descriptor 
+ *
+ * 2017-04-27:
+ *     - Fixed XMC_ETH_MAC_GetRxTimeStamp() and XMC_ETH_MAC_GetTxTimeStamp() fixed returned nanoseconds value
+ *
+ * 2017-08-03:
+ *     - Changed XMC_ETH_MAC_InitPTP(), XMC_ETH_MAC_InitPTPEx(), XMC_ETH_MAC_GetPTPTime(), XMC_ETH_MAC_UpdatePTPTime(), XMC_ETH_MAC_SetPTPAlarm(), XMC_ETH_MAC_GetRxTimeStamp(), XMC_ETH_MAC_GetTxTimeStamp()
+ *       rollover mode of nanosecond counter from binary to digital mode, i.e 1ns resolution
  *
  * @endcond
  */
@@ -159,6 +166,10 @@
 #ifndef ETH_BUS_MODE_ATDS_Msk
 #define ETH_BUS_MODE_ATDS_Msk  (0x00000080UL)
 #endif
+
+/* Resolution of sub second counter ~ 20ns */
+#define XMC_ETH_SUB_SECOND_UPDATE_FREQ (50000000)
+
 /*******************************************************************************
  * API IMPLEMENTATION
  *******************************************************************************/
@@ -300,9 +311,9 @@ void XMC_ETH_MAC_InitTxDescriptors(XMC_ETH_MAC_t *const eth_mac)
 
 /* Set address perfect filter */
 void XMC_ETH_MAC_SetAddressPerfectFilter(XMC_ETH_MAC_t *const eth_mac,
-                                     uint8_t index,
-                         const uint64_t addr,
-                         uint32_t flags)
+                                         uint8_t index,
+                                         const uint64_t addr,
+                                         uint32_t flags)
 {
   __IO uint32_t *reg;
 
@@ -478,27 +489,27 @@ XMC_ETH_MAC_STATUS_t XMC_ETH_MAC_SetManagmentClockDivider(XMC_ETH_MAC_t *const e
   reg = &(eth_mac->regs->GMII_ADDRESS);
   if (eth_mac_clk <= XMC_ETH_MAC_CLK_SPEED_35MHZ)
   {
-  *reg = XMC_ETH_MAC_MDC_DIVIDER_16;
+    *reg = XMC_ETH_MAC_MDC_DIVIDER_16;
   }
   else if (eth_mac_clk <= XMC_ETH_MAC_CLK_SPEED_60MHZ)
   {
-  *reg = XMC_ETH_MAC_MDC_DIVIDER_26;
+    *reg = XMC_ETH_MAC_MDC_DIVIDER_26;
   }
   else if (eth_mac_clk <= XMC_ETH_MAC_CLK_SPEED_100MHZ)
   {
-  *reg = XMC_ETH_MAC_MDC_DIVIDER_42;
+    *reg = XMC_ETH_MAC_MDC_DIVIDER_42;
   }
   else if (eth_mac_clk <= XMC_ETH_MAC_CLK_SPEED_150MHZ)
   {
-  *reg = XMC_ETH_MAC_MDC_DIVIDER_62;
+    *reg = XMC_ETH_MAC_MDC_DIVIDER_62;
   }
   else if (eth_mac_clk <= XMC_ETH_MAC_CLK_SPEED_200MHZ)
   {
-  *reg = XMC_ETH_MAC_MDC_DIVIDER_102;
+    *reg = XMC_ETH_MAC_MDC_DIVIDER_102;
   }
   else if (eth_mac_clk <= XMC_ETH_MAC_CLK_SPEED_250MHZ)
   {
-  *reg = XMC_ETH_MAC_MDC_DIVIDER_124;
+    *reg = XMC_ETH_MAC_MDC_DIVIDER_124;
   }
   else
   {
@@ -719,24 +730,31 @@ void XMC_ETH_MAC_InitPTP(XMC_ETH_MAC_t *const eth_mac, uint32_t config)
   /* Mask the time stamp interrupt */
   eth_mac->regs->INTERRUPT_MASK |= (uint32_t)ETH_INTERRUPT_MASK_TSIM_Msk;
 
-  /* Enable time stamp */
-  eth_mac->regs->TIMESTAMP_CONTROL = ETH_TIMESTAMP_CONTROL_TSENA_Msk;
-
-  /* Program sub-second increment register based on PTP clock frequency = fSYS/2 */
-  /* the nanoseconds register has a resolution of ~0.465ns. */
-  eth_mac->regs->SUB_SECOND_INCREMENT = (uint32_t)((0x80000000U / (float)(XMC_SCU_CLOCK_GetSystemClockFrequency() / 2)) + 0.5F);
+  /* Enable time stamp, rollover mode of nanosecond counter set to digital mode, i.e. after 0x3B9AC9FF */
+  eth_mac->regs->TIMESTAMP_CONTROL = ETH_TIMESTAMP_CONTROL_TSENA_Msk | ETH_TIMESTAMP_CONTROL_TSCTRLSSR_Msk | config;
 
   if ((config & (uint32_t)XMC_ETH_MAC_TIMESTAMP_CONFIG_FINE_UPDATE) != 0U)
   {
-    /* Program addend register to obtain fSYS/2 from reference clock (fSYS) */
-    eth_mac->regs->TIMESTAMP_ADDEND = (uint32_t)0x80000000U;
+    /* Program sub-second increment register based on PTP clock frequency ~ 50MHz */
+    eth_mac->regs->SUB_SECOND_INCREMENT = 20;
+    
+    /* fSYS = Reference Clock for the Time Stamp Update Logic*/
+    float ratio = (float)XMC_SCU_CLOCK_GetSystemClockFrequency() / (float)XMC_ETH_SUB_SECOND_UPDATE_FREQ;
+    eth_mac->regs->TIMESTAMP_ADDEND = (uint32_t)(((float)0x100000000ULL / ratio) + 0.5F);
+
     /* Addend register update */
     eth_mac->regs->TIMESTAMP_CONTROL |= (uint32_t)ETH_TIMESTAMP_CONTROL_TSADDREG_Msk;
+
     /* Poll the Timestamp Control register until the bit TSADDREG is cleared */
     while (eth_mac->regs->TIMESTAMP_CONTROL & ETH_TIMESTAMP_CONTROL_TSADDREG_Msk);
   }
+  else
+  {
+  /* Program sub-second increment register based on PTP clock frequency = fSYS/2 */
+  eth_mac->regs->SUB_SECOND_INCREMENT = (uint32_t)(((float)1000000000 / (float)XMC_SCU_CLOCK_GetSystemClockFrequency()) + 0.5F);
+  }
   
-  eth_mac->regs->TIMESTAMP_CONTROL |= config | (uint32_t)ETH_TIMESTAMP_CONTROL_TSINIT_Msk;
+  eth_mac->regs->TIMESTAMP_CONTROL |= (uint32_t)ETH_TIMESTAMP_CONTROL_TSINIT_Msk;
   while (eth_mac->regs->TIMESTAMP_CONTROL & ETH_TIMESTAMP_CONTROL_TSINIT_Msk);  
 }
 
@@ -745,32 +763,11 @@ void XMC_ETH_MAC_InitPTPEx(XMC_ETH_MAC_t *const eth_mac, uint32_t config, XMC_ET
 {
   XMC_ASSERT("XMC_ETH_MAC_InitPTP: eth_mac is invalid", XMC_ETH_MAC_IsValidModule(eth_mac->regs));
 
-  /* Mask the time stamp interrupt */
-  eth_mac->regs->INTERRUPT_MASK |= (uint32_t)ETH_INTERRUPT_MASK_TSIM_Msk;
-
-  /* Enable time stamp */
-  eth_mac->regs->TIMESTAMP_CONTROL = ETH_TIMESTAMP_CONTROL_TSENA_Msk;
-
-  /* Program sub-second increment register based on PTP clock frequency = fSYS/2 */
-  /* the nanoseconds register has a resolution of ~0.465ns. */
-  eth_mac->regs->SUB_SECOND_INCREMENT = (uint32_t)((0x80000000U / (float)(XMC_SCU_CLOCK_GetSystemClockFrequency() / 2)) + 0.5F);
-
-  if ((config & (uint32_t)XMC_ETH_MAC_TIMESTAMP_CONFIG_FINE_UPDATE) != 0U)
-  {
-    /* Program addend register to obtain fSYS/2 from reference clock (fSYS) */
-    eth_mac->regs->TIMESTAMP_ADDEND = (uint32_t)0x80000000U;
-    /* Addend register update */
-    eth_mac->regs->TIMESTAMP_CONTROL |= (uint32_t)ETH_TIMESTAMP_CONTROL_TSADDREG_Msk;
-    /* Poll the Timestamp Control register until the bit TSADDREG is cleared */
-    while (eth_mac->regs->TIMESTAMP_CONTROL & ETH_TIMESTAMP_CONTROL_TSADDREG_Msk);
-  }
-  
   /* Initialize the system time */
   eth_mac->regs->SYSTEM_TIME_NANOSECONDS_UPDATE = time->nanoseconds;
   eth_mac->regs->SYSTEM_TIME_SECONDS_UPDATE = time->seconds;
 
-  eth_mac->regs->TIMESTAMP_CONTROL |= config | (uint32_t)ETH_TIMESTAMP_CONTROL_TSINIT_Msk;
-  while (eth_mac->regs->TIMESTAMP_CONTROL & ETH_TIMESTAMP_CONTROL_TSINIT_Msk);  
+  XMC_ETH_MAC_InitPTP(eth_mac, config);
 }
 
 /* Get PTP time */
@@ -778,7 +775,7 @@ void XMC_ETH_MAC_GetPTPTime(XMC_ETH_MAC_t *const eth_mac, XMC_ETH_MAC_TIME_t *co
 {
   XMC_ASSERT("XMC_ETH_MAC_GetPTPTime: eth_mac is invalid", XMC_ETH_MAC_IsValidModule(eth_mac->regs));
 
-  time->nanoseconds = (uint32_t)(eth_mac->regs->SYSTEM_TIME_NANOSECONDS * (1000000000.0F / 0x80000000U)); /* accuracy of 0.46 ns */
+  time->nanoseconds = (uint32_t)(eth_mac->regs->SYSTEM_TIME_NANOSECONDS); /* accuracy of 1 ns */
   time->seconds = eth_mac->regs->SYSTEM_TIME_SECONDS;
 }
 
@@ -803,7 +800,7 @@ void XMC_ETH_MAC_UpdatePTPTime(XMC_ETH_MAC_t *const eth_mac, const XMC_ETH_MAC_T
   XMC_ASSERT("XMC_ETH_MAC_UpdatePTPTime: eth_mac is invalid", XMC_ETH_MAC_IsValidModule(eth_mac->regs));
   XMC_ASSERT("XMC_ETH_MAC_UpdatePTPTime: time.time_stamp_nanoseconds not in range", (time->nanoseconds < 1000000000.0F));
 
-  temp = (uint32_t)(abs(time->nanoseconds) * (0x80000000U / 1000000000.0F));
+  temp = (uint32_t)(abs(time->nanoseconds));
   if (time->nanoseconds < 0)
   {
     temp |= (uint32_t)ETH_SYSTEM_TIME_NANOSECONDS_UPDATE_ADDSUB_Msk;
@@ -821,7 +818,7 @@ void XMC_ETH_MAC_SetPTPAlarm(XMC_ETH_MAC_t *const eth_mac, const XMC_ETH_MAC_TIM
   XMC_ASSERT("XMC_ETH_MAC_SetPTPAlarm: eth_mac is invalid", XMC_ETH_MAC_IsValidModule(eth_mac->regs));
   XMC_ASSERT("XMC_ETH_MAC_SetPTPAlarm: time.time_stamp_nanoseconds not in range", (time->nanoseconds < 1000000000.0F));
 
-  eth_mac->regs->TARGET_TIME_NANOSECONDS = (uint32_t)(time->nanoseconds * (0x80000000U / 1000000000.0F));
+  eth_mac->regs->TARGET_TIME_NANOSECONDS = time->nanoseconds;
   eth_mac->regs->TARGET_TIME_SECONDS = time->seconds;
 }
 
@@ -878,16 +875,16 @@ XMC_ETH_MAC_STATUS_t XMC_ETH_MAC_GetRxTimeStamp(XMC_ETH_MAC_t *const eth_mac, XM
   }
   else
   {
-  	if ((rx_desc->status & (ETH_MAC_DMA_RDES0_TSA | ETH_MAC_DMA_RDES0_LS)) == (ETH_MAC_DMA_RDES0_TSA | ETH_MAC_DMA_RDES0_LS))
-  	{
-      time->nanoseconds = (int32_t)rx_desc->time_stamp_nanoseconds;
+    if ((rx_desc->status & (ETH_MAC_DMA_RDES0_TSA | ETH_MAC_DMA_RDES0_LS)) == (ETH_MAC_DMA_RDES0_TSA | ETH_MAC_DMA_RDES0_LS))
+    {
+      time->nanoseconds = (int32_t)(rx_desc->time_stamp_nanoseconds);
       time->seconds = rx_desc->time_stamp_seconds;      
 
       status = XMC_ETH_MAC_STATUS_OK;
     }
     else
     {
-      status = XMC_ETH_MAC_STATUS_ERROR;	
+      status = XMC_ETH_MAC_STATUS_ERROR;  
     }
   }
 
@@ -910,9 +907,9 @@ XMC_ETH_MAC_STATUS_t XMC_ETH_MAC_GetTxTimeStamp(XMC_ETH_MAC_t *const eth_mac, XM
   }
   else
   {
-  	if ((tx_desc->status & (ETH_MAC_DMA_TDES0_TTSS | ETH_MAC_DMA_TDES0_LS)) == (ETH_MAC_DMA_TDES0_TTSS | ETH_MAC_DMA_TDES0_LS))
-  	{
-      time->nanoseconds = (int32_t)tx_desc->time_stamp_nanoseconds;
+    if ((tx_desc->status & (ETH_MAC_DMA_TDES0_TTSS | ETH_MAC_DMA_TDES0_LS)) == (ETH_MAC_DMA_TDES0_TTSS | ETH_MAC_DMA_TDES0_LS))
+    {
+      time->nanoseconds = (int32_t)(tx_desc->time_stamp_nanoseconds); /* accuracy of 1 ns */
       time->seconds = tx_desc->time_stamp_seconds;
 
       status = XMC_ETH_MAC_STATUS_OK;

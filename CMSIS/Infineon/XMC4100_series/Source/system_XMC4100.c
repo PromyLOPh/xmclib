@@ -1,12 +1,12 @@
 /*********************************************************************************************************************
  * @file     system_XMC4100.c
  * @brief    CMSIS Cortex-M4 Device Peripheral Access Layer Header File for the Infineon XMC4100 Device Series
- * @version  V3.2.2
- * @date     01. Jun 2016
+ * @version  V3.2.3
+ * @date     19. Jun 2017
  *
  * @cond
  *********************************************************************************************************************
- * Copyright (c) 2015-2016, Infineon Technologies AG
+ * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,are permitted provided that the
@@ -39,6 +39,8 @@
  * V3.2.1, Feb 2016, Fixed macro XMC4108_Q48x64
  *                   Added conditional initialization of g_hrpwm_char_data
  * V3.2.2, 01. Jun 2016, Fix masking of OSCHPCTRL value 
+ * V3.2.3, 19. Jun 2017, Rely on cmsis_compiler.h instead of defining __WEAK 
+ *                       Added support for ARM Compiler 6 (armclang) 
  ******************************************************************************
  * @endcond
  */
@@ -54,21 +56,8 @@
 /*******************************************************************************
  * MACROS
  *******************************************************************************/
-
 #define CHIPID_LOC ((uint8_t *)0x20000000UL)
 #define HRPWM_CHARDATA_LOC ((uint8_t *)0x20000084UL)
-/* Define WEAK attribute */
-#if !defined(__WEAK)
-#if defined ( __CC_ARM )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __ICCARM__ )
-#define __WEAK __weak
-#elif defined ( __GNUC__ )
-#define __WEAK __attribute__ ((weak))
-#elif defined ( __TASKING__ )
-#define __WEAK __attribute__ ((weak))
-#endif
-#endif
 
 #define PMU_FLASH_WS          (0x2U)
 #define FPLL_FREQUENCY        (80000000U)
@@ -283,6 +272,12 @@ uint32_t SystemCoreClock __attribute__((at(0x20002FC0)));
 uint8_t g_chipid[16] __attribute__((at(0x20002FC4)));
 #if !defined(XMC4108_F64x64) && !defined(XMC4108_Q48x64)
 uint32_t g_hrpwm_char_data[3] __attribute__((at(0x20002FD4)));
+#endif
+#elif defined (__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+uint32_t SystemCoreClock __attribute__((section(".ARM.__at_0x20002FC0")));
+uint8_t g_chipid[16] __attribute__((section(".ARM.__at_0x20002FC4")));
+#if !defined(XMC4108_F64x64) && !defined(XMC4108_Q48x64)
+uint32_t g_hrpwm_char_data[3] __attribute__((section(".ARM.__at_0x20002FD4")));
 #endif
 #elif defined ( __ICCARM__ )
 __no_init uint32_t SystemCoreClock;

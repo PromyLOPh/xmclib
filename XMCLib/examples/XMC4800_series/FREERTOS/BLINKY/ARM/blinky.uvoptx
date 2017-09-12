@@ -117,10 +117,6 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
-          <Key>DLGUARM</Key>
-        </SetRegEntry>
-        <SetRegEntry>
-          <Number>0</Number>
           <Key>UL2CM3</Key>
           <Name>UL2CM3(-S0 -C0 -P0 )  -FN2 -FC1000 -FD20000000 -FF0XMC4800_2048 -FF1XMC4800c_2048 -FL0100000 -FL1100000 -FS0C000000 -FS18000000 -FP0($$Device:XMC4800-F144x2048$Flash\XMC4800_2048.FLM) -FP1($$Device:XMC4800-F144x2048$Flash\XMC4800c_2048.FLM)</Name>
         </SetRegEntry>

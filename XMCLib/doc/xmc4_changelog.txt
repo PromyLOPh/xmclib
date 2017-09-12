@@ -2,6 +2,56 @@
  * @page Changelog
  *
  * @tableofcontents
+ * @section v2116 Version 2.1.16
+ * @subsection COMMON COMMON
+ * - Added:
+ *     - __RAM_FUNC macro
+ * 
+ * @subsection ETH_MAC ETH_MAC
+ * - Changed:
+ *     - XMC_ETH_MAC_InitPTP(), XMC_ETH_MAC_InitPTPEx(), XMC_ETH_MAC_GetPTPTime(), XMC_ETH_MAC_UpdatePTPTime(), XMC_ETH_MAC_SetPTPAlarm(), XMC_ETH_MAC_GetRxTimeStamp(), XMC_ETH_MAC_GetTxTimeStamp()<br>
+ *       Changed rollover mode of nanosecond counter from binary to digital mode, i.e 1ns resolution
+ *       Fixed reference clock frequency for the time stamp update logic, i.e. use fSYS
+ * - Added:
+ *     - XMC_ETH_MAC_TIMESTAMP_STATUS_t enum
+ *
+ * @subsection RTC RTC
+ * - Changed:
+ *     - Changed XMC_RTC_EnableHibernationWakeUp() and XMC_RTC_DisableHibernationWakeUpcheck()<br> 
+ *       Check SCU_MIRRSTS to ensure that no transfer over serial interface is pending to the RTC_CTR register
+ *
+ * @section v2114 Version 2.1.14
+ * @subsection CCU8 CCU8
+ * - Changed:
+ *     - XMC_CCU8_SLICE_SetPrescaler() changed div_val parameter to type XMC_CCU8_SLICE_PRESCALER_t 
+ *
+ * @subsection CCU4 CCU4
+ * - Changed:
+ *     - XMC_CCU4_SLICE_SetPrescaler() changed div_val parameter to type XMC_CCU4_SLICE_PRESCALER_t 
+ *
+ * @subsection ETH_MAC ETH_MAC
+ * - Fixed:
+ *     - XMC_ETH_MAC_GetRxTimeStamp() and XMC_ETH_MAC_GetTxTimeStamp() fixed returned nanoseconds value
+ *
+ * @subsection ECAT ECAT
+ * - Changed:
+ *     - XMC_ECAT_ReadPhy() and XMC_ECAT_WritePhy() to release the MII access and check that the master enables take over of MII management control
+ *
+ * @subsection POSIF POSIF
+ * - Added:
+ *     - Added posif connectivity map file
+ * 
+ * @subsection EBU EBU
+ * - Changed:
+ *     - XMC_EBU_AddressSelectEnable() makes sure arbitartion mode is active
+ *     - XMC_EBU_Init() adds checks for the clock acknowledgment
+ *
+ * @subsection SCU SCU
+ * - Changed:
+ *     - XMC_SCU_CLOCK_Init() ensure standby clock source is updated in the HIB domain before proceeding
+ *     - XMC_SCU_CLOCK_EnableLowPowerOscillator() ensure the low power oscillator and associated watchdog is enabled before leaving the function
+ *     - Documentation changes adding note on usage of XMC_SCU_GetMirrorStatus() to check if the update of HIB register contents is done
+ * 
  * @section v2112 Version 2.1.12
  * @subsection ETH_MAC ETH_MAC
  * - Fixed:

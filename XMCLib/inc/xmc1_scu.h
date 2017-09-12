@@ -1,10 +1,10 @@
 /**
  * @file xmc1_scu.h
- * @date 2017-03-28
+ * @date 2017-08-03
  *
  * @cond
  *********************************************************************************************************************
- * XMClib v2.1.12 - XMC Peripheral Driver Library 
+ * XMClib v2.1.16 - XMC Peripheral Driver Library 
  *
  * Copyright (c) 2015-2017, Infineon Technologies AG
  * All rights reserved.
@@ -61,6 +61,10 @@
  *     - Fixed prescaler formula comments for XMC_SCU_CLOCK_EnableDCO1ExtRefCalibration()
  *     - Added XMC_SCU_SetBMI()
  *
+ * 2017-08-03:
+ *     - Removed unused XMC_SCU_CLOCK_DEEP_SLEEP_t
+ *     - Added XMC_SCU_CLOCK_EnableFlashPowerDown() and XMC_SCU_CLOCK_DisableFlashPowerDown()
+ *  
  * @endcond
  *
  */
@@ -762,21 +766,6 @@ typedef struct XMC_SCU_CLOCK_CONFIG
   XMC_SCU_CLOCK_RTCCLKSRC_t rtc_src; /**<  Source of RTC Clock */
 } XMC_SCU_CLOCK_CONFIG_t;
 
-/**
- *  Defines the data structure for initializing the deep sleep mode.
- *  During deep sleep mode peripheral clock is disabled and flash is powered down.
- *  Use type \a XMC_SCU_CLOCK_DEEP_SLEEP_t for accessing these structure parameters.
- */
-typedef struct XMC_SCU_CLOCK_DEEP_SLEEP
-{
-  bool     flash_power_down;   /**< Whether the device flash memory has to be powered down
-                                    during deep sleep mode.\n
-                                    \b Range: Set true to disable flash in deep sleep mode.*/
-  uint32_t clock_gating_mask; /**< Configures mask value of clocks to be gated during deep sleep.\n
-                                    \b Range: Use type @ref XMC_SCU_PERIPHERAL_CLOCK_t to get the bitmask
-                                    of the peripheral clocks. Multiple peripherals can be combined by
-                                    using the \a OR operation.*/
-} XMC_SCU_CLOCK_DEEP_SLEEP_t;
 
 /*********************************************************************************************************************
  * API PROTOTYPES
@@ -1212,6 +1201,56 @@ void XMC_SCU_CLOCK_ClearDCO1OscillatorWatchdogStatus(void);
  * @note Only available for XMC1400 series
  */
 bool XMC_SCU_CLOCK_IsDCO1ClockFrequencyUsable(void);
+
+/*
+ *
+ * @return None
+ * 
+ * \par<b>Description</b><br>
+ * This function enables flash power down when entering power save mode (SLEEP or DEEPSLEEP modes). 
+ * Upon wake-up, CPU is able to fetch code from flash.
+ *
+ * @usage
+ * @code
+ *
+ * // The clock of the peripherals that are not needed during sleep state can be gated before entering sleep state
+ * XMC_SCU_CLOCK_GatePeripheralClock(SCU_CLK_CGATSTAT0_MATH_Msk);
+ *
+ * // Enable FLASH power down during SLEEP and DEEPSLEEP mode 
+ * XMC_SCU_CLOCK_EnableFlashPowerDown();
+ *
+ * // Make sure that SLEEPDEEP bit is set
+ * SCB->SCR |= SCB_SCR_DEEPSLEEP_Msk;
+ *
+ * // Return to SLEEP mode after handling the wakeup event
+ * SCB->SCR |= SCB_SCR_SLEEPONEXIT_Msk; 
+ * 
+ * // Put system in DEEPSLEEP state
+ * __WFI();
+ *
+ * @endcode
+ *
+ * \par<b>Related APIs:</b><BR>
+ * XMC_FLASH_EnterSleepMode()
+ */
+__STATIC_INLINE void XMC_SCU_CLOCK_EnableFlashPowerDown(void)
+{
+  SCU_CLK->PWRSVCR = SCU_CLK_PWRSVCR_FPD_Msk;
+}
+
+/*
+ *
+ * @return None
+ * 
+ * \par<b>Description</b><br>
+ * This function disables flash power down when entering power save mode (SLEEP or DEEPSLEEP modes). 
+ * \par<b>Related APIs:</b><BR>
+ * XMC_FLASH_EnterSleepMode()
+ */
+__STATIC_INLINE void XMC_SCU_CLOCK_DisableFlashPowerDown(void)
+{
+  SCU_CLK->PWRSVCR = 0;
+}
 
 /**
  * This function selects service request source for a NVIC interrupt node.

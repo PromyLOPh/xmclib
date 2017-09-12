@@ -137,3 +137,15 @@ XMC Peripheral Library v2.1.12     (21-04-2017)
   - Updated CMSIS component to v5.0.0. See release notes in CMSIS/Readme.txt
   - See changelog section in the documentation files for individual peripheral driver changes
   - Several examples added
+
+XMC Peripheral Library v2.1.14     (30-06-2017)
+--------------------------------------------
+  - See changelog section in the documentation files for individual peripheral driver changes
+  - Updated CMSIS component to v5.0.0p1.
+    - Changes device header and system files to add support for ARM Compiler 6 (armclang)
+  - Examples added
+
+XMC Peripheral Library v2.1.16     (09-08-2017)
+--------------------------------------------
+  - See changelog section in the documentation files for individual peripheral driver changes
+  - Examples added

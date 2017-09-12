@@ -34,7 +34,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
+
 #include <xmc_common.h>
+
+#define LWIP_TIMEVAL_PRIVATE    0
 
 #define LWIP_PROVIDE_ERRNO
 
@@ -62,10 +66,6 @@
 #define LWIP_PLATFORM_ASSERT(x) do {XMC_DEBUG("Assertion \"%s\" failed at line %d in %s\n", \
                                      x, __LINE__, __FILE__);__BKPT(0);} while(0)
 
-
 #define LWIP_RAND() ((u32_t)rand())
-
-#define LWIP_PLATFORM_HTONS(x)      __REV16(x)
-#define LWIP_PLATFORM_HTONL(x)      __REV(x)
 
 #endif /* __ARCH_CC_H__ */
